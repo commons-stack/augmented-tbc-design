@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 // Material UI
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
@@ -16,6 +16,7 @@ import ResultParams from "./ResultParams";
 import PriceSimulationChart from "./PriceSimulationChart";
 // Utils
 import { getLast, getAvg, pause } from "./utils";
+import { throttle } from "lodash";
 // General styles
 import "./app.css";
 
@@ -73,11 +74,24 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 export default function App() {
-  const [d0, setD0] = useState(1e6); // Initial raise, d0 (DAI)
-  const [theta, setTheta] = useState(0.35); // fraction allocated to reserve (.)
-  const [p0, setP0] = useState(0.1); // Hatch sale Price p0 (DAI / token)
-  const [returnF, setReturnF] = useState(3); // Return factor (.)
-  const [wFee, setWFee] = useState(0.05); // friction coefficient (.)
+  const [curveParams, setCurveParams] = useState({
+    d0: 1e6, // Initial raise, d0 (DAI)
+    theta: 0.35, // fraction allocated to reserve (.)
+    p0: 0.1, // Hatch sale Price p0 (DAI / token)
+    returnF: 3, // Return factor (.)
+    wFee: 0.05 // friction coefficient (.)
+  });
+
+  const { d0, theta, p0, returnF, wFee } = curveParams;
+
+  /**
+   * Throttle the curve update to prevent the expensive chart
+   * to re-render too often
+   */
+  const setCurveParamsThrottle = useMemo(
+    () => throttle(setCurveParams, 500),
+    []
+  );
 
   // Simulation results
   const k = returnF / (1 - theta); // Invariant power kappa (.)
@@ -198,62 +212,6 @@ export default function App() {
     };
   }, [simulationActive]);
 
-  const inputFields: {
-    label: string;
-    value: number;
-    setter(newValue: any): void;
-    min: number;
-    max: number;
-    step: number;
-    display(value: number): string;
-  }[] = [
-    {
-      label: "Initial raise",
-      value: d0,
-      setter: setD0,
-      min: 0.1e6,
-      max: 10e6,
-      step: 0.1e6,
-      display: (n: number) => `$${+(n * 1e-6).toFixed(1)}M`
-    },
-    {
-      label: "Allocation to the project",
-      value: theta,
-      setter: setTheta,
-      min: 0,
-      max: 0.9,
-      step: 0.01,
-      display: (n: number) => `${Math.round(100 * n)}%`
-    },
-    {
-      label: "Initial token price",
-      value: p0,
-      setter: setP0,
-      min: 0.01,
-      max: 1,
-      step: 0.01,
-      display: (n: number) => `$${n}`
-    },
-    {
-      label: "Return factor",
-      value: returnF,
-      setter: setReturnF,
-      min: 1,
-      max: 10,
-      step: 0.1,
-      display: (n: number) => `${n}x`
-    },
-    {
-      label: "Withdrawl fee",
-      value: wFee,
-      setter: setWFee,
-      min: 0,
-      max: 0.1,
-      step: 0.001,
-      display: (n: number) => `${+(100 * n).toFixed(1)}%`
-    }
-  ];
-
   const resultFields = [
     {
       label: `Average slippage (avg tx size ${avgTxSize} DAI)`,
@@ -306,7 +264,7 @@ export default function App() {
                 {simulationActive ? (
                   <ResultParams resultFields={resultFields} />
                 ) : (
-                  <InputParams inputFields={inputFields} />
+                  <InputParams setCurveParams={setCurveParamsThrottle} />
                 )}
               </Box>
             </Paper>
@@ -315,22 +273,7 @@ export default function App() {
           <Grid item xs={12} md={6}>
             <Paper className={classes.paper}>
               <Box className={classes.boxHeader}>
-                <Grid
-                  container
-                  direction="row"
-                  justify="space-between"
-                  alignItems="center"
-                >
-                  <Typography variant="h6">Preview</Typography>
-                  <Button
-                    variant="contained"
-                    className={classes.button}
-                    onClick={startSimulation}
-                    disabled={simulationRunning}
-                  >
-                    Run simulation
-                  </Button>
-                </Grid>
+                <Typography variant="h6">Preview</Typography>
               </Box>
 
               <Box className={classes.boxChart}>
@@ -348,6 +291,30 @@ export default function App() {
                     p0={p0}
                   />
                 )}
+              </Box>
+            </Paper>
+          </Grid>
+        </Grid>
+
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={12}>
+            <Paper>
+              <Box className={classes.boxHeader}>
+                <Grid
+                  container
+                  direction="row"
+                  justify="center"
+                  alignItems="center"
+                >
+                  <Button
+                    variant="contained"
+                    className={classes.button}
+                    onClick={startSimulation}
+                    disabled={simulationRunning}
+                  >
+                    Run simulation
+                  </Button>
+                </Grid>
               </Box>
             </Paper>
           </Grid>

@@ -1,12 +1,16 @@
 {
   "name": "augmented-tbc-design",
   "version": "0.1.0",
+  "homepage": "https://dapplion.github.io/augmented-tbc-design",
   "dependencies": {
     "@material-ui/core": "latest",
+    "@types/lodash": "^4.14.136",
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "lodash": "^4.17.15",
     "react": "latest",
     "react-dom": "latest",
+    "react-number-format": "^4.0.8",
     "react-scripts": "latest",
     "recharts": "^1.6.2",
     "typescript": "latest"
@@ -15,6 +19,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "eject": "react-scripts eject"
   },
   "browserslist": {
@@ -30,6 +36,7 @@
     ]
   },
   "devDependencies": {
-    "@types/recharts": "^1.1.20"
+    "@types/recharts": "^1.1.20",
+    "gh-pages": "^2.0.1"
   }
 }
