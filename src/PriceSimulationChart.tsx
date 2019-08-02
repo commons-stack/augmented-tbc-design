@@ -10,6 +10,7 @@ import {
   Tooltip
 } from "recharts";
 import { useTheme } from "@material-ui/styles";
+import { linspace } from "./utils";
 
 function PriceSimulationChart({
   priceTimeseries,
@@ -67,6 +68,13 @@ function PriceSimulationChart({
           dataKey={keyHorizontal}
           tick={{ fill: theme.palette.text.secondary }}
           stroke={theme.palette.text.secondary}
+          ticks={[
+            ...linspace({
+              to: priceTimeseries.length,
+              steps: 4
+            }).map(Math.floor),
+            priceTimeseries.length - 1
+          ]}
         />
         <YAxis
           yAxisId="left"
