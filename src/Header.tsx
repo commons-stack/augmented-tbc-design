@@ -5,7 +5,11 @@ import Typography from "@material-ui/core/Typography";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    root: {
+    title: {
+      // color: theme.palette.text.secondary,
+    },
+    subtitle: {
+      color: theme.palette.text.secondary,
       margin: theme.spacing(3, 0, 0)
     },
     lightBulb: {
@@ -14,6 +18,21 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     link: {
       color: theme.palette.primary.main
+    },
+    logoContainer: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: theme.spacing(4)
+    },
+    logo: {
+      width: "25px",
+      marginRight: "4px"
+    },
+    logoText: {
+      display: "inline",
+      fontSize: "1.1rem",
+      fontWeight: 500
     }
   })
 );
@@ -22,14 +41,17 @@ export default function Header() {
   const classes = useStyles();
   return (
     <>
-      <Typography variant="h4" component="h1" gutterBottom>
+      <div className={classes.logoContainer}>
+        <img src="./favicon.ico" className={classes.logo} alt="logo" />
+        <Typography className={classes.logoText}>Commons Stack</Typography>
+      </div>
+
+      <Typography className={classes.title} variant="h4">
         Augmented Token Bonding Curve Design
       </Typography>
-      <Typography className={classes.root}>
-        Experiment and test augmented token bonding curves, part of the{" "}
-        <Link className={classes.link} href="https://commonsstack.org/">
-          Commons Stack
-        </Link>
+
+      <Typography className={classes.subtitle}>
+        Experiment and test augmented token bonding curves
       </Typography>
     </>
   );

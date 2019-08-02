@@ -45,6 +45,9 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: theme.spacing(3, 3),
       minHeight: 310
     },
+    boxButton: {
+      padding: theme.spacing(3, 3)
+    },
     boxHeader: {
       padding: theme.spacing(3, 3),
       height: theme.spacing(headerOffset),
@@ -65,7 +68,8 @@ const useStyles = makeStyles((theme: Theme) =>
     header: {
       backgroundColor: "#0b1216",
       color: "#f8f8f8",
-      padding: theme.spacing(9, 0, 6 + headerOffset),
+      textAlign: "center",
+      padding: theme.spacing(3, 0, 6 + headerOffset),
       marginBottom: -theme.spacing(headerOffset)
     },
     button: {
