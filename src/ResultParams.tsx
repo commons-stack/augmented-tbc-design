@@ -3,9 +3,6 @@ import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 
-const grayColor = "#90a4ae";
-const blackColor = "#141e27";
-
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
@@ -16,19 +13,18 @@ const useStyles = makeStyles((theme: Theme) =>
       marginRight: theme.spacing(1)
     },
     leftContainer: {
-      color: grayColor
+      color: theme.palette.text.secondary
     },
     centerContainer: {
-      color: blackColor
+      // color: blackColor
     },
     listBoxContainer: {
       "& > div:not(:last-child)": {
         marginBottom: "12px",
-        borderBottom: "1px solid #e0e0e0"
+        borderBottom: "1px solid #313d47"
       }
     },
     listBox: {
-      height: "48px",
       paddingBottom: "12px",
       "& > div": {
         display: "flex",

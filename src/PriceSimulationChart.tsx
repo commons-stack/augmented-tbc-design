@@ -9,10 +9,7 @@ import {
   ResponsiveContainer,
   Tooltip
 } from "recharts";
-
-const grayColor = "#90a4ae";
-const strongColor = "#4ab47c";
-const strongOpositeColor = "#b44a9b";
+import { useTheme } from "@material-ui/styles";
 
 function PriceSimulationChart({
   priceTimeseries,
@@ -42,8 +39,12 @@ function PriceSimulationChart({
     });
   }
 
+  // Chart components
+
+  const theme: any = useTheme();
+
   function renderColorfulLegendText(value: string) {
-    return <span style={{ color: grayColor }}>{value}</span>;
+    return <span style={{ color: theme.palette.text.secondary }}>{value}</span>;
   }
 
   const formatter = (n: number) => (+n.toPrecision(3)).toLocaleString();
@@ -64,15 +65,15 @@ function PriceSimulationChart({
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey={keyHorizontal}
-          tick={{ fill: grayColor }}
-          stroke={grayColor}
+          tick={{ fill: theme.palette.text.secondary }}
+          stroke={theme.palette.text.secondary}
         />
         <YAxis
           yAxisId="left"
           domain={[Math.min(...priceTimeseries), Math.max(...priceTimeseries)]}
           tickFormatter={formatter}
-          tick={{ fill: grayColor }}
-          stroke={grayColor}
+          tick={{ fill: theme.palette.text.secondary }}
+          stroke={theme.palette.text.secondary}
         />
 
         {/* Capital collected from withdraw fees - AXIS */}
@@ -83,8 +84,8 @@ function PriceSimulationChart({
           //   Math.ceil(Math.max(...withdrawFeeTimeseries))
           // ]}
           orientation="right"
-          tick={{ fill: grayColor }}
-          stroke={grayColor}
+          tick={{ fill: theme.palette.text.secondary }}
+          stroke={theme.palette.text.secondary}
         />
 
         <Tooltip formatter={value => Number(value)} />
@@ -93,8 +94,8 @@ function PriceSimulationChart({
           yAxisId="left"
           type="monotone"
           dataKey={keyVerticalLeft}
-          stroke={strongColor}
-          fill={strongColor}
+          stroke={theme.palette.primary.main}
+          fill={theme.palette.primary.main}
         />
 
         {/* Capital collected from withdraw fees - AREA */}
@@ -103,8 +104,8 @@ function PriceSimulationChart({
           yAxisId="right"
           type="monotone"
           dataKey={keyVerticalRight}
-          stroke={strongOpositeColor}
-          fill={strongOpositeColor}
+          stroke={theme.palette.secondary.main}
+          fill={theme.palette.secondary.main}
         />
 
         {/* <ReferenceLine

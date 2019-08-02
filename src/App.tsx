@@ -26,18 +26,20 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     mainContainer: {
       "& > div:not(:last-child)": {
-        paddingBottom: theme.spacing(6)
+        paddingBottom: theme.spacing(3)
       },
       "& > div": {
         "& > div": {
           paddingTop: "0 !important"
         }
-      }
+      },
+      paddingBottom: theme.spacing(9)
     },
     paper: {
       width: "100%",
       height: "100%",
-      minHeight: 310
+      minHeight: 310,
+      backgroundColor: "#293640"
     },
     box: {
       padding: theme.spacing(3, 3),
@@ -48,7 +50,7 @@ const useStyles = makeStyles((theme: Theme) =>
       height: theme.spacing(headerOffset),
       display: "flex",
       alignItems: "center",
-      borderBottom: "1px solid #e0e0e0"
+      borderBottom: "1px solid #313d47"
     },
     boxChart: {
       width: "100%",
@@ -61,8 +63,8 @@ const useStyles = makeStyles((theme: Theme) =>
       paddingLeft: "5px"
     },
     header: {
-      backgroundColor: "#070a0e",
-      color: "#f5f7f8",
+      backgroundColor: "#0b1216",
+      color: "#f8f8f8",
       padding: theme.spacing(9, 0, 6 + headerOffset),
       marginBottom: -theme.spacing(headerOffset)
     },
@@ -89,7 +91,7 @@ export default function App() {
    * to re-render too often
    */
   const setCurveParamsThrottle = useMemo(
-    () => throttle(setCurveParams, 500),
+    () => throttle(setCurveParams, 1000),
     []
   );
 
@@ -240,57 +242,31 @@ export default function App() {
 
       <Container fixed className={classes.mainContainer}>
         <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} sm={12} md={6} lg={4}>
             <Paper className={classes.paper}>
               <Box className={classes.boxHeader}>
-                <Grid
-                  container
-                  direction="row"
-                  justify="space-between"
-                  alignItems="center"
-                >
-                  <Typography variant="h6">
-                    {simulationActive ? "Results" : "Curve Design"}
-                  </Typography>
-                  <Fade in={simulationActive}>
-                    <Button variant="contained" onClick={clearSimulation}>
-                      Back to design
-                    </Button>
-                  </Fade>
-                </Grid>
+                <Typography variant="h6">Curve Design</Typography>
               </Box>
 
               <Box className={classes.box}>
-                {simulationActive ? (
-                  <ResultParams resultFields={resultFields} />
-                ) : (
-                  <InputParams setCurveParams={setCurveParamsThrottle} />
-                )}
+                <InputParams setCurveParams={setCurveParamsThrottle} />
               </Box>
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} sm={12} md={6} lg={8}>
             <Paper className={classes.paper}>
               <Box className={classes.boxHeader}>
                 <Typography variant="h6">Preview</Typography>
               </Box>
 
               <Box className={classes.boxChart}>
-                {simulationActive ? (
-                  <PriceSimulationChart
-                    priceTimeseries={priceTimeseries}
-                    withdrawFeeTimeseries={withdrawFeeTimeseries}
-                    p0={p0}
-                  />
-                ) : (
-                  <SupplyVsDemandChart
-                    returnF={returnF}
-                    theta={theta}
-                    d0={d0}
-                    p0={p0}
-                  />
-                )}
+                <SupplyVsDemandChart
+                  returnF={returnF}
+                  theta={theta}
+                  d0={d0}
+                  p0={p0}
+                />
               </Box>
             </Paper>
           </Grid>
@@ -319,6 +295,38 @@ export default function App() {
             </Paper>
           </Grid>
         </Grid>
+
+        {simulationActive && (
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={12} md={6} lg={8}>
+              <Paper className={classes.paper}>
+                <Box className={classes.boxHeader}>
+                  <Typography variant="h6">Price walk</Typography>
+                </Box>
+
+                <Box className={classes.boxChart}>
+                  <PriceSimulationChart
+                    priceTimeseries={priceTimeseries}
+                    withdrawFeeTimeseries={withdrawFeeTimeseries}
+                    p0={p0}
+                  />
+                </Box>
+              </Paper>
+            </Grid>
+
+            <Grid item xs={12} sm={12} md={6} lg={4}>
+              <Paper className={classes.paper}>
+                <Box className={classes.boxHeader}>
+                  <Typography variant="h6">Results</Typography>
+                </Box>
+
+                <Box className={classes.box}>
+                  <ResultParams resultFields={resultFields} />
+                </Box>
+              </Paper>
+            </Grid>
+          </Grid>
+        )}
       </Container>
     </>
   );

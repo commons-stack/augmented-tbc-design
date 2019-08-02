@@ -14,14 +14,8 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import NumberFormat from "react-number-format";
 import { throttle } from "lodash";
 
-const grayColor = "#90a4ae";
-const blackColor = "#141e27";
-// const commonsGradient = "#67de69 #1c709c";
-const strongColor = "#4ab47c";
-
 const PrettoSlider = withStyles({
   root: {
-    color: strongColor,
     height: 8
   },
   thumb: {
@@ -48,7 +42,6 @@ const PrettoSlider = withStyles({
     borderRadius: 4
   },
   markLabel: {
-    color: grayColor,
     top: 30
   }
 })(Slider);
@@ -63,20 +56,19 @@ const useStyles = makeStyles((theme: Theme) =>
       marginRight: theme.spacing(1)
     },
     leftContainer: {
-      color: grayColor
+      color: theme.palette.text.secondary
     },
     centerContainer: {
-      color: blackColor
+      // color: blackColor
     },
     listBoxContainer: {
       "& > div:not(:last-child)": {
         paddingBottom: "12px",
         marginBottom: "12px",
-        borderBottom: "1px solid #e0e0e0"
+        borderBottom: "1px solid #313d47"
       }
     },
     listBox: {
-      height: "48px",
       "& > div": {
         display: "flex",
         alignItems: "center",
@@ -87,6 +79,9 @@ const useStyles = makeStyles((theme: Theme) =>
       "& > div:not(:last-child)": {
         paddingRight: "12px"
       }
+    },
+    slider: {
+      color: theme.palette.primary.main
     }
   })
 );
@@ -160,7 +155,7 @@ export default function InputParams({
       toNum: (n: string) => Math.floor(parseFloat(n) * 1e6)
     },
     {
-      label: "Allocation to the project",
+      label: "Allocation to project",
       value: theta,
       setter: setTheta,
       min: 0,
@@ -181,6 +176,8 @@ export default function InputParams({
       step: 0.01,
       unit: "$",
       prefix: "$",
+      toText: (n: number) => String(+n.toFixed(2)),
+      toNum: (n: string) => parseFloat(n),
       format: (n: number) => `$${n}`
     },
     {
@@ -192,6 +189,8 @@ export default function InputParams({
       step: 0.1,
       unit: "x",
       suffix: "x",
+      toText: (n: number) => String(+n.toFixed(1)),
+      toNum: (n: string) => parseFloat(n),
       format: (n: number) => `${n}x`
     },
     {
@@ -265,6 +264,7 @@ export default function InputParams({
 
               <Grid item xs={4}>
                 <PrettoSlider
+                  className={classes.slider}
                   valueLabelDisplay="auto"
                   aria-label={label}
                   defaultValue={value}

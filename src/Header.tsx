@@ -3,8 +3,6 @@ import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import Link from "@material-ui/core/Link";
 import Typography from "@material-ui/core/Typography";
 
-const strongColor = "#4ab47c";
-
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
@@ -15,7 +13,7 @@ const useStyles = makeStyles((theme: Theme) =>
       marginRight: theme.spacing(1)
     },
     link: {
-      color: strongColor
+      color: theme.palette.primary.main
     }
   })
 );

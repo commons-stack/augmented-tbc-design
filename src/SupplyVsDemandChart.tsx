@@ -11,11 +11,7 @@ import {
   Tooltip
 } from "recharts";
 import { linspace } from "./utils";
-
-const grayColor = "#90a4ae";
-// const blackColor = "#141e27";
-const strongColor = "#4ab47c";
-const softColor = "#bbe3cd";
+import { useTheme } from "@material-ui/styles";
 
 function SupplyVsDemandChart({
   returnF,
@@ -75,11 +71,29 @@ function SupplyVsDemandChart({
     });
   }
 
+  // Chart components
+
+  const theme: any = useTheme();
+
   const formatter = (n: number) =>
     (+(n / scaling).toPrecision(2)).toLocaleString();
 
   function renderColorfulLegendText(value: string) {
-    return <span style={{ color: grayColor }}>{value}</span>;
+    return <span style={{ color: theme.palette.text.secondary }}>{value}</span>;
+  }
+
+  function ReferenceLabel(props: any) {
+    const { textAnchor, viewBox } = props;
+    return (
+      <text
+        x={viewBox.x + 10}
+        y={30}
+        fill={theme.palette.text.secondary}
+        textAnchor={textAnchor}
+      >
+        Initial value
+      </text>
+    );
   }
 
   return (
@@ -102,25 +116,25 @@ function SupplyVsDemandChart({
           dataKey={keyHorizontal}
           tickFormatter={formatter}
           unit={unit}
-          tick={{ fill: grayColor }}
-          stroke={grayColor}
+          tick={{ fill: theme.palette.text.secondary }}
+          stroke={theme.palette.text.secondary}
         />
         <YAxis
           interval={"preserveStartEnd"}
           ticks={linspace({ to: f(to), steps: 3 })}
           tickFormatter={formatter}
           unit={unit}
-          tick={{ fill: grayColor }}
+          tick={{ fill: theme.palette.text.secondary }}
           domain={[0, f(to)]}
-          stroke={grayColor}
+          stroke={theme.palette.text.secondary}
         />
         <Tooltip formatter={value => formatter(Number(value))} />
         <Area
           isAnimationActive={false}
           type="monotone"
           dataKey={keyVertical}
-          stroke={strongColor}
-          fill={softColor}
+          stroke={theme.palette.primary.main}
+          fill={theme.palette.primary.main}
         />
         <ReferenceLine
           x={R0}
@@ -131,15 +145,6 @@ function SupplyVsDemandChart({
         <Legend formatter={renderColorfulLegendText} />
       </AreaChart>
     </ResponsiveContainer>
-  );
-}
-
-function ReferenceLabel(props: any) {
-  const { textAnchor, viewBox } = props;
-  return (
-    <text x={viewBox.x + 10} y={30} fill={grayColor} textAnchor={textAnchor}>
-      Initial value
-    </text>
   );
 }
 
