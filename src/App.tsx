@@ -137,7 +137,7 @@ export default function App() {
     async function simulateRandomDelta() {
       const R_t: number[] = [R0];
       const S_t: number[] = [S0];
-      const p_t: number[] = [R0 / S0];
+      const p_t: number[] = [k* R0 ** (1/k) / S0];
       const wFee_t: number[] = [0];
       const slippage_t: number[] = [];
 
