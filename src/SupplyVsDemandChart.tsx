@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   Tooltip
 } from "recharts";
-import { linspace } from "./utils";
+import { getLinspaceTicks } from "./utils";
 import { useTheme } from "@material-ui/styles";
 
 function SupplyVsDemandChart({
@@ -112,7 +112,7 @@ function SupplyVsDemandChart({
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           interval={"preserveStartEnd"}
-          ticks={linspace({ to: to, steps: 4 })}
+          ticks={getLinspaceTicks(data.map(d => d[keyHorizontal]), 4)}
           dataKey={keyHorizontal}
           tickFormatter={formatter}
           unit={unit}
@@ -121,7 +121,7 @@ function SupplyVsDemandChart({
         />
         <YAxis
           interval={"preserveStartEnd"}
-          ticks={linspace({ to: f(to), steps: 3 })}
+          ticks={getLinspaceTicks(data.map(d => d[keyVertical]), 3)}
           tickFormatter={formatter}
           unit={unit}
           tick={{ fill: theme.palette.text.secondary }}
@@ -139,7 +139,7 @@ function SupplyVsDemandChart({
         <ReferenceLine
           x={R0}
           stroke="#90a4ae"
-          strokeDasharray="6 3"
+          strokeDasharray="9 0"
           label={<ReferenceLabel />}
         />
         <Legend formatter={renderColorfulLegendText} />

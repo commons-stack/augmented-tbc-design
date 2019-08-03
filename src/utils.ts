@@ -16,6 +16,20 @@ export function linspace({
 }
 
 /**
+ * Returns a uniform distribution of `num` ticks
+ */
+export function getLinspaceTicks(data: number[], num: number) {
+  const desiredPoints = [];
+  const step = (data[data.length - 1] - data[0]) / num;
+  for (let x = data[0]; x < data[data.length - 1]; x += step) {
+    desiredPoints.push(x);
+  }
+  if (desiredPoints.length < num + 1) desiredPoints.push(data[data.length - 1]);
+
+  return desiredPoints;
+}
+
+/**
  * Returns the last element of an array
  */
 export function getLast(a: number[]) {
