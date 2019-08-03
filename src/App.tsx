@@ -14,6 +14,7 @@ import InputParams from "./InputParams";
 import SupplyVsDemandChart from "./SupplyVsDemandChart";
 import ResultParams from "./ResultParams";
 import PriceSimulationChart from "./PriceSimulationChart";
+import HelpText from "./HelpText";
 // Utils
 import { getLast, getAvg, pause } from "./utils";
 import { throttle } from "lodash";
@@ -250,6 +251,18 @@ export default function App() {
             <Paper className={classes.paper}>
               <Box className={classes.boxHeader}>
                 <Typography variant="h6">Curve Design</Typography>
+                <HelpText
+                  text={
+                    <span>
+                      Description of the different parameters <br />
+                      Initial raise: Lorem ipsum <br />
+                      Allocation to project: Lorem ipsum <br />
+                      Initial token price: Lorem ipsum <br />
+                      Return factor: Lorem ipsum <br />
+                      Withdrawl fee: Lorem ipsum
+                    </span>
+                  }
+                />
               </Box>
 
               <Box className={classes.box}>
@@ -262,6 +275,9 @@ export default function App() {
             <Paper className={classes.paper}>
               <Box className={classes.boxHeader}>
                 <Typography variant="h6">Preview</Typography>
+                <HelpText
+                  text={<span>Preview of the token bonding curve</span>}
+                />
               </Box>
 
               <Box className={classes.boxChart}>
@@ -305,7 +321,10 @@ export default function App() {
             <Grid item xs={12} sm={12} md={6} lg={8}>
               <Paper className={classes.paper}>
                 <Box className={classes.boxHeader}>
-                  <Typography variant="h6">Price walk</Typography>
+                  <Typography variant="h6">Simulation</Typography>
+                  <HelpText
+                    text={<span>Some context about this simulation</span>}
+                  />
                 </Box>
 
                 <Box className={classes.boxChart}>
@@ -322,6 +341,9 @@ export default function App() {
               <Paper className={classes.paper}>
                 <Box className={classes.boxHeader}>
                   <Typography variant="h6">Results</Typography>
+                  <HelpText
+                    text={<span>Explanation of what do this results mean</span>}
+                  />
                 </Box>
 
                 <Box className={classes.box}>
