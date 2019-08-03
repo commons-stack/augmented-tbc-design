@@ -3,17 +3,17 @@
   "version": "0.1.0",
   "homepage": "https://dapplion.github.io/augmented-tbc-design",
   "dependencies": {
-    "@material-ui/core": "latest",
+    "@material-ui/core": "^4.3.0",
     "@types/lodash": "^4.14.136",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
+    "@types/react": "^16.8.24",
+    "@types/react-dom": "^16.8.5",
     "lodash": "^4.17.15",
-    "react": "latest",
-    "react-dom": "latest",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
     "react-number-format": "^4.0.8",
-    "react-scripts": "latest",
+    "react-scripts": "^3.0.1",
     "recharts": "^1.6.2",
-    "typescript": "latest"
+    "typescript": "^3.5.3"
   },
   "scripts": {
     "start": "react-scripts start",
