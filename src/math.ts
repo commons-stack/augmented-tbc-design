@@ -11,14 +11,14 @@ export function getInitialParams({
   d0,
   theta,
   p0,
-  returnF
+  p1
 }: {
   d0: number;
   theta: number;
   p0: number;
-  returnF: number;
+  p1: number;
 }) {
-  const k = returnF / (1 - theta); // Invariant power kappa (.)
+  const k = p1 / p0 / (1 - theta); // Invariant power kappa (.)
   const R0 = (1 - theta) * d0; // Initial reserve (DAI)
   const S0 = d0 / p0; // initial supply of tokens (token)
   const V0 = S0 ** k / R0; // invariant coef

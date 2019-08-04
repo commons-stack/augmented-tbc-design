@@ -6,6 +6,7 @@ import {
   YAxis,
   CartesianGrid,
   Legend,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip
 } from "recharts";
@@ -15,11 +16,13 @@ import { linspace } from "./utils";
 function PriceSimulationChart({
   priceTimeseries,
   withdrawFeeTimeseries,
-  p0
+  p0,
+  p1
 }: {
   priceTimeseries: number[];
   withdrawFeeTimeseries: number[];
   p0: number;
+  p1: number;
 }) {
   // d0      - Initial raise, d0 (DAI)
   // theta   - fraction allocated to reserve (.)
@@ -50,6 +53,21 @@ function PriceSimulationChart({
 
   const formatter = (n: number) => (+n.toPrecision(3)).toLocaleString();
 
+  function ReferenceLabel(props: any) {
+    const { textAnchor, viewBox, text } = props;
+    console.log(props);
+    return (
+      <text
+        x={viewBox.x + 10}
+        y={viewBox.y - 10}
+        fill={theme.palette.text.secondary}
+        textAnchor={textAnchor}
+      >
+        {text}
+      </text>
+    );
+  }
+
   return (
     <ResponsiveContainer debounce={1}>
       <AreaChart
@@ -76,9 +94,11 @@ function PriceSimulationChart({
             priceTimeseries.length - 1
           ]}
         />
+
+        {/* Price time evolution */}
         <YAxis
           yAxisId="left"
-          domain={[Math.min(...priceTimeseries), Math.max(...priceTimeseries)]}
+          domain={[0, Math.max(...priceTimeseries, p1 * 1.25)]}
           tickFormatter={formatter}
           tick={{ fill: theme.palette.text.secondary }}
           stroke={theme.palette.text.secondary}
@@ -97,6 +117,7 @@ function PriceSimulationChart({
         />
 
         <Tooltip formatter={value => Number(value)} />
+
         <Area
           isAnimationActive={false}
           yAxisId="left"
@@ -104,6 +125,20 @@ function PriceSimulationChart({
           dataKey={keyVerticalLeft}
           stroke={theme.palette.primary.main}
           fill={theme.palette.primary.main}
+        />
+        <ReferenceLine
+          y={p0}
+          yAxisId="left"
+          stroke={theme.palette.primary.main}
+          strokeDasharray="9 0"
+          label={<ReferenceLabel text="Hatch sale price" />}
+        />
+        <ReferenceLine
+          y={p1}
+          yAxisId="left"
+          stroke={theme.palette.primary.main}
+          strokeDasharray="9 0"
+          label={<ReferenceLabel text="After hatch price" />}
         />
 
         {/* Capital collected from withdraw fees - AREA */}

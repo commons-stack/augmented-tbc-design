@@ -91,11 +91,11 @@ export default function App() {
     d0: 1e6, // Initial raise, d0 (DAI)
     theta: 0.35, // fraction allocated to reserve (.)
     p0: 0.1, // Hatch sale price p0 (DAI / token)
-    returnF: 3, // Return factor (.)
+    p1: 0.3, // Return factor (.)
     wFee: 0.05 // friction coefficient (.)
   });
 
-  const { d0, theta, p0, returnF, wFee } = curveParams;
+  const { d0, theta, p0, p1, wFee } = curveParams;
 
   /**
    * Throttle the curve update to prevent the expensive chart
@@ -116,7 +116,7 @@ export default function App() {
     d0,
     theta,
     p0,
-    returnF
+    p1
   });
 
   const [priceTimeseries, setPriceTimeseries] = useState([0]);
@@ -270,12 +270,7 @@ export default function App() {
               </Box>
 
               <Box className={classes.boxChart}>
-                <SupplyVsDemandChart
-                  returnF={returnF}
-                  theta={theta}
-                  d0={d0}
-                  p0={p0}
-                />
+                <SupplyVsDemandChart theta={theta} d0={d0} p0={p0} p1={p1} />
               </Box>
             </Paper>
           </Grid>
@@ -321,6 +316,7 @@ export default function App() {
                     priceTimeseries={priceTimeseries}
                     withdrawFeeTimeseries={withdrawFeeTimeseries}
                     p0={p0}
+                    p1={p1}
                   />
                 </Box>
               </Paper>

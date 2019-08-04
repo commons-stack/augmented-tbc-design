@@ -111,7 +111,7 @@ export default function InputParams({
     d0: number;
     theta: number;
     p0: number;
-    returnF: number;
+    p1: number;
     wFee: number;
   };
   setCurveParams(newCurveParams: any): void;
@@ -119,12 +119,14 @@ export default function InputParams({
   const [d0, setD0] = useState(1e6); // Initial raise, d0 (DAI)
   const [theta, setTheta] = useState(0.35); // fraction allocated to reserve (.)
   const [p0, setP0] = useState(0.1); // Hatch sale Price p0 (DAI / token)
-  const [returnF, setReturnF] = useState(3); // Return factor (.)
+  const [p1, setP1] = useState(0.3); // Return factor (.)
   const [wFee, setWFee] = useState(0.05); // friction coefficient (.)
 
   function setParentCurveParams() {
-    setCurveParams({ d0, theta, p0, returnF, wFee });
+    setCurveParams({ d0, theta, p0, p1, wFee });
   }
+
+  const maxReturnRate = 10;
 
   const inputFields: {
     label: string;
@@ -168,7 +170,7 @@ export default function InputParams({
       toNum: (n: string) => parseFloat(n) * 1e-2
     },
     {
-      label: "Initial token price",
+      label: "Hatch sale price",
       value: p0,
       setter: setP0,
       min: 0.01,
@@ -181,17 +183,17 @@ export default function InputParams({
       format: (n: number) => `$${n}`
     },
     {
-      label: "Return factor",
-      value: returnF,
-      setter: setReturnF,
-      min: 1,
-      max: 10,
-      step: 0.1,
-      unit: "x",
-      suffix: "x",
-      toText: (n: number) => String(+n.toFixed(1)),
+      label: "After hatch price",
+      value: p1,
+      setter: setP1,
+      min: p0 || 0.1,
+      max: Number((maxReturnRate * p0).toFixed(2)),
+      step: 0.01,
+      unit: "$",
+      prefix: "$",
+      toText: (n: number) => String(+n.toFixed(2)),
       toNum: (n: string) => parseFloat(n),
-      format: (n: number) => `${n}x`
+      format: (n: number) => `$${n}`
     },
     {
       label: "Withdrawl fee",
@@ -207,6 +209,11 @@ export default function InputParams({
       toNum: (n: string) => parseFloat(n) * 1e-2
     }
   ];
+
+  useEffect(() => {
+    if (p1 < p0) setP1(p0);
+    else if (p1 > p0 * maxReturnRate) setP1(p0 * maxReturnRate);
+  }, [p0]);
 
   const classes = useStyles();
 

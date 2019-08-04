@@ -11,18 +11,19 @@ import {
   Tooltip
 } from "recharts";
 import { getLinspaceTicks } from "./utils";
+import { getInitialParams } from "./math";
 import { useTheme } from "@material-ui/styles";
 
 function SupplyVsDemandChart({
-  returnF,
   theta,
   d0,
-  p0
+  p0,
+  p1
 }: {
-  returnF: number;
   theta: number;
   d0: number;
   p0: number;
+  p1: number;
 }) {
   // d0      - Initial raise, d0 (DAI)
   // theta   - fraction allocated to reserve (.)
@@ -31,9 +32,16 @@ function SupplyVsDemandChart({
   // wFee    - friction coefficient (.)
 
   // Hatch parameters
-  const k = returnF / (1 - theta); // Invariant power kappa (.)
-  const R0 = (1 - theta / 100) * d0; // Initial reserve (DAI)
-  const S0 = d0 / p0; // initial supply of tokens (token)
+  const {
+    k, // Invariant power kappa (.)
+    R0, // Initial reserve (DAI)
+    S0 // initial supply of tokens (token)
+  } = getInitialParams({
+    d0,
+    theta,
+    p0,
+    p1
+  });
   const S_of_R = (R: number) => S0 * (R / R0) ** (1 / k);
 
   // Function setup
@@ -138,7 +146,7 @@ function SupplyVsDemandChart({
         />
         <ReferenceLine
           x={R0}
-          stroke="#90a4ae"
+          stroke={theme.palette.primary.main}
           strokeDasharray="9 0"
           label={<ReferenceLabel />}
         />
