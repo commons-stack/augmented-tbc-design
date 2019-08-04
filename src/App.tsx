@@ -234,24 +234,24 @@ export default function App() {
 
   const resultFields = [
     {
-      label: `Average slippage (avg tx size ${Math.round(
-        avgTxSize
-      ).toLocaleString()} DAI)`,
-      value: +(100 * avgSlippage).toFixed(3) + "%"
+      label: `Total reserve`,
+      value: (+totalReserve.toPrecision(3)).toLocaleString() + " DAI"
     },
     {
-      label: `Capital collected from withdraw fees (${withdrawCount} txs)`,
+      label: `Funds generated from initial hatch`,
+      value: Math.round(d0 * theta).toLocaleString() + " DAI"
+    },
+    {
+      label: `Funds generated from withdraw fees (${withdrawCount} txs)`,
       value:
         (+getLast(withdrawFeeTimeseries).toPrecision(3)).toLocaleString() +
         " DAI"
     },
     {
-      label: `Capital collected from initial hatch`,
-      value: Math.round(d0 * theta).toLocaleString() + " DAI"
-    },
-    {
-      label: `Total reserve`,
-      value: (+totalReserve.toPrecision(3)).toLocaleString() + " DAI"
+      label: `Average slippage (avg tx size ${Math.round(
+        avgTxSize
+      ).toLocaleString()} DAI)`,
+      value: +(100 * avgSlippage).toFixed(3) + "%"
     }
   ];
 
