@@ -1,0 +1,1 @@
+{"version":3,"sources":["app.css"],"names":[],"mappings":"AAAA,WAEE,wBAAyB,CACzB,gBAAiB,CACjB,QACF","file":"main.837772ec.chunk.css","sourcesContent":["#root,\nbody {\n  background-color: #152128;\n  min-height: 100vh;\n  margin: 0;\n}\n"]}
