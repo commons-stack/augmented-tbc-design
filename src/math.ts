@@ -53,6 +53,8 @@ export function getSlippage({
   return Math.abs(realizedPrice - spotPrice) / spotPrice;
 }
 
+// Price walk utils
+
 /**
  * Generate a random delta given three components:
  * 1. Climbing sin
@@ -78,4 +80,63 @@ export function getRandomDeltas({
   // Normalize random deltas with the average transaction size
   const deltaR_avg = getAvg(deltaR_t);
   return deltaR_t.map((deltaR: number) => (avgTxSize * deltaR) / deltaR_avg);
+}
+
+/**
+ * Get deltaR for a given price growth factor
+ */
+export function getDeltaR_priceGrowth({
+  R,
+  k,
+  priceGrowth
+}: {
+  R: number;
+  k: number;
+  priceGrowth: number;
+}) {
+  return -R + (priceGrowth * R ** (1 - 1 / k)) ** (k / (-1 + k));
+}
+
+/**
+ * Computes a tx distribution using a normal distribution,
+ * Given a sum of tx value and a number of transactions
+ *
+ * Demo: https://codepen.io/anon/pen/mNqJjv?editors=0010#0
+ * Very quick: < 10ms for 10000 txs
+ */
+export function getTxDistribution({ sum, num }: { sum: number; num: number }) {
+  const mean = sum / num;
+  const off = mean * 4;
+  const x: number[] = [];
+  for (let i = 0; i < num; i++) {
+    x[i] = randn_bm(mean - off, mean + off);
+  }
+  return x;
+}
+
+// Minor utils
+
+/**
+ * Random variable uniformly distributed
+ */
+export function rv_U(min: number, max: number) {
+  return Math.random() * (max - min) + min;
+}
+
+/**
+ * Standard Normal variate using Box-Muller transform.
+ * by https://stackoverflow.com/questions/25582882/javascript-math-random-normal-distribution-gaussian-bell-curve/36481059#36481059
+ */
+function randn_bm(min: number, max: number) {
+  var u = 0,
+    v = 0;
+  while (u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+  while (v === 0) v = Math.random();
+  let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+
+  num = num / 10.0 + 0.5; // Translate to 0 -> 1
+  if (num > 1 || num < 0) num = randn_bm(min, max); // resample between 0 and 1 if out of range
+  num *= max - min; // Stretch to fill range
+  num += min; // offset to min
+  return num;
 }

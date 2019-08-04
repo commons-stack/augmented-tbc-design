@@ -21,7 +21,10 @@ import {
   getInitialParams,
   getPriceR,
   getRandomDeltas,
-  getSlippage
+  getSlippage,
+  getTxDistribution,
+  getDeltaR_priceGrowth,
+  rv_U
 } from "./math";
 import { throttle } from "lodash";
 // General styles
@@ -41,6 +44,9 @@ const useStyles = makeStyles((theme: Theme) =>
         }
       },
       paddingBottom: theme.spacing(9)
+    },
+    simulationContainer: {
+      minHeight: "442px"
     },
     paper: {
       width: "100%",
@@ -72,6 +78,15 @@ const useStyles = makeStyles((theme: Theme) =>
       paddingRight: "5px",
       paddingLeft: "5px"
     },
+    boxPlaceholder: {
+      padding: theme.spacing(3, 3),
+      display: "flex",
+      height: "100%",
+      alignItems: "center",
+      justifyContent: "center",
+      color: theme.palette.text.secondary,
+      opacity: 0.4
+    },
     header: {
       backgroundColor: "#0b1216",
       color: "#f8f8f8",
@@ -102,7 +117,7 @@ export default function App() {
    * to re-render too often
    */
   const setCurveParamsThrottle = useMemo(
-    () => throttle(setCurveParams, 1000),
+    () => throttle(setCurveParams, 250),
     []
   );
 
@@ -124,10 +139,14 @@ export default function App() {
   const [totalReserve, setTotalReserve] = useState(R0);
   const [withdrawCount, setWithdrawCount] = useState(0);
   const [avgSlippage, setAvgSlippage] = useState(0);
-  const [avgTxSize] = useState(10000);
+  const [avgTxSize, setAvgTxSize] = useState(0);
   // Simulation state variables
   const [simulationActive, setSimulationActive] = useState(false);
   const [simulationRunning, setSimulationRunning] = useState(false);
+
+  useEffect(() => {
+    setSimulationActive(false);
+  }, [curveParams]);
 
   // #### TEST: Immediate simulation
 
@@ -157,47 +176,52 @@ export default function App() {
       const p_t: number[] = [getPriceR({ R: R0, V0, k })];
       const wFee_t: number[] = [0];
       const slippage_t: number[] = [];
+      const avgTxSize_t: number[] = [];
 
       // Random walk
-      const numSteps = 100;
-      const updateEveryNth = 1;
+      const numSteps = 52;
 
-      // Compute the random deltas
-      const deltaR_t = getRandomDeltas({ numSteps, avgTxSize });
-
+      // numSteps = 52 take 8ms to run
       setSimulationRunning(true);
-      for (let i = 0; i < numSteps; i++) {
-        const deltaR = deltaR_t[i];
+      for (let t = 0; t < numSteps; t++) {
+        const txsWeek = Math.ceil(t < 5 ? rv_U(0, 5) : rv_U(5, 2 * t));
+        const priceGrowth = rv_U(0.99, 1.03);
 
         const R = getLast(R_t);
+        const deltaR = getDeltaR_priceGrowth({ R, k, priceGrowth });
 
         const R_next = R + deltaR;
 
+        const txs = getTxDistribution({ sum: deltaR, num: txsWeek });
+        // Compute slippage
+        const slippage = getAvg(
+          txs.map(txR => getSlippage({ R, deltaR: txR, V0, k }))
+        );
+        const txsWithdraw = txs.filter(tx => tx < 0);
+        const wFees = -wFee * txsWithdraw.reduce((t, c) => t + c, 0);
+        const _avgTxSize =
+          txs.reduce((t, c) => t + Math.abs(c), 0) / txs.length;
+
         R_t.push(R_next);
         p_t.push(getPriceR({ R: R_next, V0, k }));
-        slippage_t.push(getSlippage({ R, deltaR, V0, k }));
-
-        // Consider withdraw fees on sales only
-        if (deltaR < 0) {
-          wFee_t.push(getLast(wFee_t) - deltaR * wFee);
-          setWithdrawCount(c => c + 1);
-        } else {
-          wFee_t.push(getLast(wFee_t));
-        }
+        slippage_t.push(slippage);
+        avgTxSize_t.push(_avgTxSize);
+        wFee_t.push(getLast(wFee_t) + wFees);
+        setWithdrawCount(c => c + txsWithdraw.length);
 
         // Stop the simulation if it's no longer active
         if (!simulationActive || !canContinueSimulation) break;
-
-        if (i % updateEveryNth === 0) {
-          setPriceTimeseries(p_t);
-          setWithdrawFeeTimeseries(wFee_t);
-          setAvgSlippage(getAvg(slippage_t));
-          setTotalReserve(R_next);
-
-          // Make this run non-UI blocking
-          await pause(5);
-        }
       }
+
+      setPriceTimeseries(p_t);
+      setWithdrawFeeTimeseries(wFee_t);
+      setAvgSlippage(getAvg(slippage_t));
+      setAvgTxSize(getAvg(avgTxSize_t));
+      setTotalReserve(getLast(R_t));
+
+      // Make this run non-UI blocking
+      await pause(5);
+
       setSimulationRunning(false);
     }
 
@@ -210,7 +234,9 @@ export default function App() {
 
   const resultFields = [
     {
-      label: `Average slippage (avg tx size ${avgTxSize} DAI)`,
+      label: `Average slippage (avg tx size ${Math.round(
+        avgTxSize
+      ).toLocaleString()} DAI)`,
       value: +(100 * avgSlippage).toFixed(3) + "%"
     },
     {
@@ -218,6 +244,10 @@ export default function App() {
       value:
         (+getLast(withdrawFeeTimeseries).toPrecision(3)).toLocaleString() +
         " DAI"
+    },
+    {
+      label: `Capital collected from initial hatch`,
+      value: Math.round(d0 * theta).toLocaleString() + " DAI"
     },
     {
       label: `Total reserve`,
@@ -300,44 +330,58 @@ export default function App() {
           </Grid>
         </Grid>
 
-        {simulationActive && (
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={12} md={6} lg={8}>
-              <Paper className={classes.paper}>
-                <Box className={classes.boxHeader}>
-                  <Typography variant="h6">Simulation</Typography>
-                  <HelpText
-                    text={<span>Some context about this simulation</span>}
-                  />
-                </Box>
+        <Grid container spacing={3} className={classes.simulationContainer}>
+          {simulationActive ? (
+            <>
+              <Grid item xs={12} sm={12} md={6} lg={8}>
+                <Paper className={classes.paper}>
+                  <Box className={classes.boxHeader}>
+                    <Typography variant="h6">Simulation</Typography>
+                    <HelpText
+                      text={<span>Some context about this simulation</span>}
+                    />
+                  </Box>
 
-                <Box className={classes.boxChart}>
-                  <PriceSimulationChart
-                    priceTimeseries={priceTimeseries}
-                    withdrawFeeTimeseries={withdrawFeeTimeseries}
-                    p0={p0}
-                    p1={p1}
-                  />
+                  <Box className={classes.boxChart}>
+                    <PriceSimulationChart
+                      priceTimeseries={priceTimeseries}
+                      withdrawFeeTimeseries={withdrawFeeTimeseries}
+                      p0={p0}
+                      p1={p1}
+                    />
+                  </Box>
+                </Paper>
+              </Grid>
+
+              <Grid item xs={12} sm={12} md={6} lg={4}>
+                <Paper className={classes.paper}>
+                  <Box className={classes.boxHeader}>
+                    <Typography variant="h6">Results</Typography>
+                    <HelpText
+                      text={
+                        <span>Explanation of what do this results mean</span>
+                      }
+                    />
+                  </Box>
+
+                  <Box className={classes.box}>
+                    <ResultParams resultFields={resultFields} />
+                  </Box>
+                </Paper>
+              </Grid>
+            </>
+          ) : (
+            <Grid item xs={12}>
+              <Paper className={classes.paper}>
+                <Box className={classes.boxPlaceholder}>
+                  <Typography variant="h6">
+                    Run a simulation to see results
+                  </Typography>
                 </Box>
               </Paper>
             </Grid>
-
-            <Grid item xs={12} sm={12} md={6} lg={4}>
-              <Paper className={classes.paper}>
-                <Box className={classes.boxHeader}>
-                  <Typography variant="h6">Results</Typography>
-                  <HelpText
-                    text={<span>Explanation of what do this results mean</span>}
-                  />
-                </Box>
-
-                <Box className={classes.box}>
-                  <ResultParams resultFields={resultFields} />
-                </Box>
-              </Paper>
-            </Grid>
-          </Grid>
-        )}
+          )}
+        </Grid>
       </Container>
     </>
   );

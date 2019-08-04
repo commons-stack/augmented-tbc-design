@@ -55,7 +55,6 @@ function PriceSimulationChart({
 
   function ReferenceLabel(props: any) {
     const { textAnchor, viewBox, text } = props;
-    console.log(props);
     return (
       <text
         x={viewBox.x + 10}
