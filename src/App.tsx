@@ -17,6 +17,12 @@ import PriceSimulationChart from "./PriceSimulationChart";
 import HelpText from "./HelpText";
 // Utils
 import { getLast, getAvg, pause } from "./utils";
+import {
+  getInitialParams,
+  getPriceR,
+  getRandomDeltas,
+  getSlippage
+} from "./math";
 import { throttle } from "lodash";
 // General styles
 import "./app.css";
@@ -84,7 +90,7 @@ export default function App() {
   const [curveParams, setCurveParams] = useState({
     d0: 1e6, // Initial raise, d0 (DAI)
     theta: 0.35, // fraction allocated to reserve (.)
-    p0: 0.1, // Hatch sale Price p0 (DAI / token)
+    p0: 0.1, // Hatch sale price p0 (DAI / token)
     returnF: 3, // Return factor (.)
     wFee: 0.05 // friction coefficient (.)
   });
@@ -101,10 +107,17 @@ export default function App() {
   );
 
   // Simulation results
-  const k = returnF / (1 - theta); // Invariant power kappa (.)
-  const R0 = (1 - theta / 100) * d0; // Initial reserve (DAI)
-  const S0 = d0 / p0; // initial supply of tokens (token)
-  const V0 = S0 ** k / R0; // invariant coef
+  const {
+    k, // Invariant power kappa (.)
+    R0, // Initial reserve (DAI)
+    S0, // initial supply of tokens (token)
+    V0 // invariant coef
+  } = getInitialParams({
+    d0,
+    theta,
+    p0,
+    returnF
+  });
 
   const [priceTimeseries, setPriceTimeseries] = useState([0]);
   const [withdrawFeeTimeseries, setWithdrawFeeTimeseries] = useState([0]);
@@ -141,8 +154,7 @@ export default function App() {
     let canContinueSimulation = true;
     async function simulateRandomDelta() {
       const R_t: number[] = [R0];
-      const S_t: number[] = [S0];
-      const p_t: number[] = [R0 / S0];
+      const p_t: number[] = [getPriceR({ R: R0, V0, k })];
       const wFee_t: number[] = [0];
       const slippage_t: number[] = [];
 
@@ -151,37 +163,20 @@ export default function App() {
       const updateEveryNth = 1;
 
       // Compute the random deltas
-      const deltaR_t: number[] = [];
-      for (let i = 0; i < numSteps; i++) {
-        const rand = 1 - 2 * Math.random();
-        const sin = Math.sin((1 / 20) * (i / numSteps));
-        const ascending = Math.sin((Math.PI / 1) * (i / numSteps));
-        const deltaR = 1e5 * rand + 1e5 * sin + 2e4 * ascending;
-        deltaR_t.push(deltaR);
-      }
-
-      // Normalize random deltas with the average transaction size
-      const deltaR_avg = getAvg(deltaR_t);
-      const deltaR_t_normalized = deltaR_t.map(
-        (deltaR: number) => (avgTxSize * deltaR) / deltaR_avg
-      );
+      const deltaR_t = getRandomDeltas({ numSteps, avgTxSize });
 
       setSimulationRunning(true);
       for (let i = 0; i < numSteps; i++) {
-        const deltaR = deltaR_t_normalized[i];
+        const deltaR = deltaR_t[i];
 
-        // Protect against too strong negative deltas
         const R = getLast(R_t);
-        const S = getLast(S_t);
-        const p = getLast(p_t);
 
         const R_next = R + deltaR;
-        const deltaS = (V0 * (R + deltaR)) ** (1 / k) - S;
-        const S_next = S + deltaS;
 
         R_t.push(R_next);
-        S_t.push(S_next);
-        p_t.push(R_next / S_next);
+        p_t.push(getPriceR({ R: R_next, V0, k }));
+        slippage_t.push(getSlippage({ R, deltaR, V0, k }));
+
         // Consider withdraw fees on sales only
         if (deltaR < 0) {
           wFee_t.push(getLast(wFee_t) - deltaR * wFee);
@@ -189,12 +184,6 @@ export default function App() {
         } else {
           wFee_t.push(getLast(wFee_t));
         }
-
-        const p_next = getLast(p_t);
-        // const realizedPrice = deltaR / deltaS;
-        const spotPrice = p;
-        const slippage = Math.abs(p_next - spotPrice) / spotPrice / 2;
-        slippage_t.push(slippage);
 
         // Stop the simulation if it's no longer active
         if (!simulationActive || !canContinueSimulation) break;
