@@ -3,6 +3,9 @@ import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import Link from "@material-ui/core/Link";
 import Typography from "@material-ui/core/Typography";
 
+const cadCadLink =
+  "https://medium.com/block-science/cadcad-filling-a-critical-gap-in-open-source-data-science-fcd0d3faa8ed";
+
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     title: {
@@ -11,6 +14,10 @@ const useStyles = makeStyles((theme: Theme) =>
     subtitle: {
       color: theme.palette.text.secondary,
       margin: theme.spacing(3, 0, 0)
+    },
+    subsubtitle: {
+      color: theme.palette.text.secondary,
+      opacity: 0.6
     },
     lightBulb: {
       verticalAlign: "middle",
@@ -52,6 +59,10 @@ export default function Header() {
 
       <Typography className={classes.subtitle}>
         Experiment and test augmented token bonding curves
+      </Typography>
+      <Typography className={classes.subsubtitle}>
+        A narrative showcase of <Link href={cadCadLink}>cadCAD</Link>
+        's capabilities
       </Typography>
     </>
   );
