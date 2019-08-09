@@ -7,7 +7,6 @@ import Box from "@material-ui/core/Box";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
-import Fade from "@material-ui/core/Fade";
 // Components
 import Header from "./Header";
 import InputParams from "./InputParams";
@@ -193,7 +192,7 @@ export default function App() {
   const {
     k, // Invariant power kappa (.)
     R0, // Initial reserve (DAI)
-    S0, // initial supply of tokens (token)
+    // S0, // initial supply of tokens (token)
     V0 // invariant coef
   } = getInitialParams({
     d0,
@@ -239,6 +238,7 @@ export default function App() {
 
   useEffect(() => {
     let canContinueSimulation = true;
+
     async function simulateRandomDelta() {
       const R_t: number[] = [R0];
       const p_t: number[] = [getPriceR({ R: R0, V0, k })];
@@ -286,9 +286,6 @@ export default function App() {
       setAvgSlippage(getAvg(slippage_t));
       setAvgTxSize(getAvg(avgTxSize_t));
       setTotalReserve(getLast(R_t));
-
-      // Make this run non-UI blocking
-      await pause(5);
 
       setSimulationRunning(false);
     }

@@ -1,5 +1,3 @@
-import { getAvg } from "./utils";
-
 /**
  * Computes the initial params given the "user friendly" params:
  * - Initial raise, `d0` (DAI)

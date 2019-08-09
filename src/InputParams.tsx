@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState } from "react";
 import {
   createStyles,
   makeStyles,
@@ -9,10 +9,7 @@ import Typography from "@material-ui/core/Typography";
 import Slider from "@material-ui/core/Slider";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
-import InputLabel from "@material-ui/core/InputLabel";
-import InputAdornment from "@material-ui/core/InputAdornment";
 import NumberFormat from "react-number-format";
-import { throttle } from "lodash";
 
 const PrettoSlider = withStyles({
   root: {
@@ -122,6 +119,12 @@ export default function InputParams({
   const [p1, setP1] = useState(0.3); // Return factor (.)
   const [wFee, setWFee] = useState(0.05); // friction coefficient (.)
 
+  function _setP0(newP0: number) {
+    setP0(newP0);
+    if (p1 < newP0) setP1(newP0);
+    else if (p1 > newP0 * maxReturnRate) setP1(newP0 * maxReturnRate);
+  }
+
   function setParentCurveParams() {
     setCurveParams({ d0, theta, p0, p1, wFee });
   }
@@ -172,7 +175,7 @@ export default function InputParams({
     {
       label: "Hatch price",
       value: p0,
-      setter: setP0,
+      setter: _setP0,
       min: 0.01,
       max: 1,
       step: 0.01,
@@ -209,11 +212,6 @@ export default function InputParams({
       toNum: (n: string) => parseFloat(n) * 1e-2
     }
   ];
-
-  useEffect(() => {
-    if (p1 < p0) setP1(p0);
-    else if (p1 > p0 * maxReturnRate) setP1(p0 * maxReturnRate);
-  }, [p0]);
 
   const classes = useStyles();
 
