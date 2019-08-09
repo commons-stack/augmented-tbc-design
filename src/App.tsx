@@ -96,9 +96,78 @@ const useStyles = makeStyles((theme: Theme) =>
     button: {
       background: "linear-gradient(290deg, #2ad179, #4ab47c)",
       color: "white"
+    },
+    // Descriptions
+    descriptionContainer: {
+      "& > div:not(:last-child)": {
+        paddingBottom: theme.spacing(1),
+        marginBottom: theme.spacing(1),
+        borderBottom: "1px solid #3f5463"
+      },
+      "& td": {
+        verticalAlign: "top",
+        padding: theme.spacing(0.5)
+      }
+    },
+    descriptionTitle: {
+      fontWeight: theme.typography.fontWeightBold,
+      padding: theme.spacing(0.5)
+    },
+    descriptionName: {
+      fontWeight: theme.typography.fontWeightBold
     }
   })
 );
+
+const parameterDescriptions = [
+  {
+    name: "Initial raise",
+    text: "Total funds raised in the hatch period of the ABC launch"
+  },
+  {
+    name: "Allocation to funding pool",
+    text:
+      "The percentage of the funds raised in the Hatch sale that go directly into the project funding pool to compensate future work done in the project"
+  },
+  {
+    name: "Hatch price",
+    text:
+      "The price paid per 'ABC token' by community members involved in hatching the project"
+  },
+  {
+    name: "Post-hatch price",
+    text:
+      "The price of the 'ABC token' when the curve enters the open phase and is live for public participation"
+  },
+  {
+    name: "Exit tribute",
+    text:
+      "The percentage of funds that are diverted to the project funding pool from community members who exit funds from the project by burning 'ABC tokens' in exchange for collateral"
+  }
+];
+
+const resultParameterDescriptions = [
+  {
+    name: "Total reserve",
+    text:
+      "Total DAI in the smart contract reserve at the end of the simulated period"
+  },
+  {
+    name: "Funds generated from initial hatch",
+    text:
+      "Fraction of the funds (theta) raised during the hatch that go directly to the cause"
+  },
+  {
+    name: "Funds generated from exit tributes",
+    text:
+      "Cumulative amount of exit tributes collected from only exit /sell transactions"
+  },
+  {
+    name: "Average slippage",
+    text:
+      "Average of the slippage of each transaction occured during the simulation period"
+  }
+];
 
 export default function App() {
   const [curveParams, setCurveParams] = useState({
@@ -241,7 +310,7 @@ export default function App() {
       value: Math.round(d0 * theta).toLocaleString() + " DAI"
     },
     {
-      label: `Funds generated from withdraw fees (${withdrawCount} txs)`,
+      label: `Funds generated from exit tributes (${withdrawCount} txs)`,
       value:
         (+getLast(withdrawFeeTimeseries).toPrecision(3)).toLocaleString() +
         " DAI"
@@ -271,14 +340,29 @@ export default function App() {
                 <Typography variant="h6">Curve Design</Typography>
                 <HelpText
                   text={
-                    <span>
-                      Description of the different parameters <br />
-                      Initial raise: Lorem ipsum <br />
-                      Allocation to project: Lorem ipsum <br />
-                      Initial token price: Lorem ipsum <br />
-                      Return factor: Lorem ipsum <br />
-                      Withdrawl fee: Lorem ipsum
-                    </span>
+                    <div className={classes.descriptionContainer}>
+                      <div>
+                        <Typography className={classes.descriptionTitle}>
+                          Parameters description:
+                        </Typography>
+                      </div>
+                      <table>
+                        <tbody>
+                          {parameterDescriptions.map(({ name, text }) => (
+                            <tr key={name}>
+                              <td>
+                                <Typography className={classes.descriptionName}>
+                                  {name}
+                                </Typography>
+                              </td>
+                              <td>
+                                <Typography>{text}</Typography>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   }
                 />
               </Box>
@@ -294,7 +378,15 @@ export default function App() {
               <Box className={classes.boxHeader}>
                 <Typography variant="h6">Preview</Typography>
                 <HelpText
-                  text={<span>Preview of the token bonding curve</span>}
+                  text={
+                    <Typography>
+                      Visualization of the token bonding curve analytic function
+                      on a specific range of reserve [0, 4 * R0]. This result is
+                      deterministic given the current set of parameters and will
+                      never change regardes of the campaign performance, it only
+                      shows how the price will react to reserve changes.
+                    </Typography>
+                  }
                 />
               </Box>
 
@@ -337,7 +429,16 @@ export default function App() {
                   <Box className={classes.boxHeader}>
                     <Typography variant="h6">Simulation</Typography>
                     <HelpText
-                      text={<span>Some context about this simulation</span>}
+                      text={
+                        <Typography>
+                          This chart shows a 52 week simulation of discrete
+                          transactions interacting with the token bonding curve.
+                          Each transaction adds or substract reserve to the
+                          system, modifying the price over time. The frequency,
+                          size and direction of each transaction is computed
+                          from a set of bounded random functions.
+                        </Typography>
+                      }
                     />
                   </Box>
 
@@ -358,7 +459,33 @@ export default function App() {
                     <Typography variant="h6">Results</Typography>
                     <HelpText
                       text={
-                        <span>Explanation of what do this results mean</span>
+                        <div className={classes.descriptionContainer}>
+                          <div>
+                            <Typography className={classes.descriptionTitle}>
+                              Result parameters description:
+                            </Typography>
+                          </div>
+                          <table>
+                            <tbody>
+                              {resultParameterDescriptions.map(
+                                ({ name, text }) => (
+                                  <tr key={name}>
+                                    <td>
+                                      <Typography
+                                        className={classes.descriptionName}
+                                      >
+                                        {name}
+                                      </Typography>
+                                    </td>
+                                    <td>
+                                      <Typography>{text}</Typography>
+                                    </td>
+                                  </tr>
+                                )
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
                       }
                     />
                   </Box>

@@ -1,8 +1,7 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Popover from "@material-ui/core/Popover";
-import Typography from "@material-ui/core/Typography";
-import Fab from "@material-ui/core/Fab";
+import Box from "@material-ui/core/Box";
 import HelpIcon from "@material-ui/icons/HelpOutline";
 
 const useStyles = makeStyles(theme => ({
@@ -17,11 +16,15 @@ const useStyles = makeStyles(theme => ({
       opacity: 0.85
     }
   },
-  typography: {
+  popoverContainer: {
     padding: theme.spacing(2)
   },
   paper: {
-    backgroundColor: "#384b59"
+    backgroundColor: "#384b59",
+    maxWidth: theme.breakpoints.values.md * 0.9,
+    [`@media screen and (max-width: ${theme.breakpoints.values.md}px)`]: {
+      maxWidth: "90vw"
+    }
   }
 }));
 
@@ -52,6 +55,7 @@ export default function SimplePopover({ text }: { text: any }) {
         open={open}
         anchorEl={anchorEl}
         onClose={handleClose}
+        onClick={handleClose}
         anchorOrigin={{
           vertical: "bottom",
           horizontal: "center"
@@ -61,7 +65,7 @@ export default function SimplePopover({ text }: { text: any }) {
           horizontal: "center"
         }}
       >
-        <Typography className={classes.typography}>{text}</Typography>
+        <Box className={classes.popoverContainer}>{text}</Box>
       </Popover>
     </div>
   );

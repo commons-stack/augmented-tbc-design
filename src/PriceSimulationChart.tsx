@@ -32,7 +32,7 @@ function PriceSimulationChart({
 
   const keyHorizontal = "x";
   const keyVerticalLeft = "Price (DAI / token)";
-  const keyVerticalRight = "Collected withdraw fee (DAI)";
+  const keyVerticalRight = "Total exit tributes (DAI)";
 
   const data = [];
   for (let t = 0; t < priceTimeseries.length; t++) {

@@ -157,7 +157,7 @@ export default function InputParams({
       toNum: (n: string) => Math.floor(parseFloat(n) * 1e6)
     },
     {
-      label: "Allocation to project",
+      label: "Allocation to funding pool",
       value: theta,
       setter: setTheta,
       min: 0,
@@ -170,7 +170,7 @@ export default function InputParams({
       toNum: (n: string) => parseFloat(n) * 1e-2
     },
     {
-      label: "Hatch sale price",
+      label: "Hatch price",
       value: p0,
       setter: setP0,
       min: 0.01,
@@ -183,7 +183,7 @@ export default function InputParams({
       format: (n: number) => `$${n}`
     },
     {
-      label: "After hatch price",
+      label: "Post-hatch price",
       value: p1,
       setter: setP1,
       min: p0 || 0.1,
@@ -196,7 +196,7 @@ export default function InputParams({
       format: (n: number) => `$${n}`
     },
     {
-      label: "Withdrawl fee",
+      label: "Exit tribute",
       value: wFee,
       setter: setWFee,
       min: 0,
@@ -282,11 +282,6 @@ export default function InputParams({
                   max={max}
                   step={step}
                   valueLabelFormat={value => format(value).replace("$", "")}
-                  // marks={[
-                  //   { value: 0, label: "0%" },
-                  //   { value: 50, label: "50%" },
-                  //   { value: 100, label: "100%" }
-                  // ]}
                 />
               </Grid>
             </Grid>
