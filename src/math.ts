@@ -56,33 +56,6 @@ export function getSlippage({
 // Price walk utils
 
 /**
- * Generate a random delta given three components:
- * 1. Climbing sin
- * 2. Oscilating sin
- * 3. Random component
- */
-export function getRandomDeltas({
-  numSteps,
-  avgTxSize
-}: {
-  numSteps: number;
-  avgTxSize: number;
-}) {
-  const deltaR_t: number[] = [];
-  for (let i = 0; i < numSteps; i++) {
-    const rand = 1 - 2 * Math.random();
-    const sin = Math.sin((1 / 20) * (i / numSteps));
-    const ascending = Math.sin((Math.PI / 1) * (i / numSteps));
-    const deltaR = 1e5 * rand + 1e5 * sin + 2e4 * ascending;
-    deltaR_t.push(deltaR);
-  }
-
-  // Normalize random deltas with the average transaction size
-  const deltaR_avg = getAvg(deltaR_t);
-  return deltaR_t.map((deltaR: number) => (avgTxSize * deltaR) / deltaR_avg);
-}
-
-/**
  * Get deltaR for a given price growth factor
  */
 export function getDeltaR_priceGrowth({

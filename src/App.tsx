@@ -20,7 +20,6 @@ import { getLast, getAvg, pause } from "./utils";
 import {
   getInitialParams,
   getPriceR,
-  getRandomDeltas,
   getSlippage,
   getTxDistribution,
   getDeltaR_priceGrowth,
