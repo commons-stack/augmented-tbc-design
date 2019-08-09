@@ -1,7 +1,7 @@
 {
   "name": "augmented-tbc-design",
   "version": "0.1.0",
-  "homepage": "https://dapplion.github.io/augmented-tbc-design",
+  "homepage": "https://commons-stack.github.io/augmented-tbc-design",
   "dependencies": {
     "@material-ui/core": "^4.3.0",
     "@material-ui/icons": "^4.2.1",
@@ -39,5 +39,6 @@
   "devDependencies": {
     "@types/recharts": "^1.1.20",
     "gh-pages": "^2.0.1"
-  }
+  },
+  "author": "dappLion <dapplion@dappnode.com> (https://github.com/dapplion/)"
 }
