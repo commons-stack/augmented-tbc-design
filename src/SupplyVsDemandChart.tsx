@@ -48,7 +48,7 @@ function SupplyVsDemandChart({
   const f = S_of_R;
   const from = 0;
   const to = 4 * R0;
-  const steps = 100;
+  const steps = 100 + 1; // Add 1 for the ticks to match
   const step = (to - from) / steps;
 
   /**
@@ -72,7 +72,8 @@ function SupplyVsDemandChart({
   const keyVertical = "Supply (tokens) / Reserve (DAI)";
 
   const data = [];
-  for (let x = from; x <= to; x += step) {
+  for (let i = 0; i < steps; i++) {
+    const x = from + step * i;
     data.push({
       [keyHorizontal]: x,
       [keyVertical]: f(x)
@@ -119,8 +120,7 @@ function SupplyVsDemandChart({
       >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
-          interval={"preserveStartEnd"}
-          ticks={getLinspaceTicks(data.map(d => d[keyHorizontal]), 4)}
+          interval={24}
           dataKey={keyHorizontal}
           tickFormatter={formatter}
           unit={unit}
