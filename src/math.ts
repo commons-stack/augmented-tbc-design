@@ -23,27 +23,12 @@ export function getInitialParams({
   return { k, R0, S0, V0 };
 }
 
-function getR({ S, V0, k }: { S: number; V0: number; k: number }) {
+export function getR({ S, V0, k }: { S: number; V0: number; k: number }) {
   return S ** k / V0;
 }
 
 export function getS({ R, V0, k }: { R: number; V0: number; k: number }) {
   return (V0 * R) ** (1 / k);
-}
-
-// compute the reserve if all that supply is burned
-export function getMinR({
-  S,
-  H,
-  V0,
-  k
-}: {
-  S: number;
-  H: number;
-  V0: number;
-  k: number;
-}) {
-  return getR({ S: S - H, V0, k });
 }
 
 // compute the price if all that supply is burned
@@ -63,7 +48,8 @@ export function getMinPrice({
     const myP = getPriceR({ R: myR, V0, k }); // numerical precision make complex numbers just suppress it
     return Math.abs(myP);
   } else {
-    const minR = getMinR({ S, H, V0, k });
+    // compute the reserve if all that supply is burned
+    const minR = getR({ S: S - H, V0, k });
     return getPriceR({ R: minR, V0, k });
   }
 }

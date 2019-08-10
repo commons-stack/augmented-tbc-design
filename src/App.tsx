@@ -23,7 +23,7 @@ import {
   getMinPrice,
   getS,
   vest_tokens,
-  getMinR,
+  getR,
   getSlippage,
   getTxDistribution,
   getDeltaR_priceGrowth,
@@ -127,6 +127,9 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     descriptionName: {
       fontWeight: theme.typography.fontWeightBold
+    },
+    descriptionPadding: {
+      padding: theme.spacing(0.5)
     }
   })
 );
@@ -158,6 +161,23 @@ const parameterDescriptions = [
   }
 ];
 
+const simulationParameterDescriptions = [
+  {
+    name: "Price",
+    text: "Price of the token over time."
+  },
+  {
+    name: "Floor price",
+    text:
+      "Lower bound of the price guaranteed by the vesting of hatch tokens. It decreases over time as more hatch tokens are allowed to be traded"
+  },
+  {
+    name: "Total exit tributes",
+    text:
+      "Cumulative sum of exit tributes collected from only exit /sell transactions"
+  }
+];
+
 const resultParameterDescriptions = [
   {
     name: "Total reserve",
@@ -167,12 +187,12 @@ const resultParameterDescriptions = [
   {
     name: "Funds generated from initial hatch",
     text:
-      "Fraction of the funds (theta) raised during the hatch that go directly to the cause"
+      "Fraction of the funds (theta) raised during the hatch that go directly to the cause (analytic result)"
   },
   {
     name: "Funds generated from exit tributes",
     text:
-      "Cumulative amount of exit tributes collected from only exit /sell transactions"
+      "Cumulative sum of exit tributes collected from only exit /sell transactions"
   },
   {
     name: "Average slippage",
@@ -286,10 +306,11 @@ export default function App() {
 
         // enforce the effects of the unvested tokens not being burnable
         let u_lower;
-        if (H === S) {
+        if (H > S) {
           u_lower = 1;
         } else {
-          const R_ratio = getMinR({ S, H, V0, k }) / R;
+          // compute the reserve if all that supply is burned
+          const R_ratio = getR({ S: S - H, V0, k }) / R;
           u_lower = Math.max(1 - R_ratio, u_min);
         }
         const priceGrowth = rv_U(u_lower, u_max);
@@ -328,11 +349,13 @@ export default function App() {
         const _avgTxSize = getMedian(txsWithdraw);
 
         R_t.push(R_next);
+        S_t.push(S_next);
+        H_t.push(H_next);
         p_t.push(getPriceR({ R: R_next, V0, k }));
         slippage_t.push(slippage);
         avgTxSize_t.push(_avgTxSize);
         wFee_t.push(getLast(wFee_t) + wFees);
-        H_t.push(H_next);
+
         floorprice_t.push(floorprice_next);
         setWithdrawCount(c => c + txsWithdraw.length);
 
@@ -454,13 +477,16 @@ export default function App() {
                 <Typography variant="h6">Preview</Typography>
                 <HelpText
                   text={
-                    <Typography>
-                      Visualization of the token bonding curve analytic function
-                      on a specific range of reserve [0, 4 * R0]. This result is
-                      deterministic given the current set of parameters and will
-                      never change regardes of the campaign performance, it only
-                      shows how the price will react to reserve changes.
-                    </Typography>
+                    <div className={classes.descriptionPadding}>
+                      <Typography>
+                        Visualization of the token bonding curve analytic
+                        function on a specific range of reserve [0, 4 * R0].
+                        This result is deterministic given the current set of
+                        parameters and will never change regardes of the
+                        campaign performance, it only shows how the price will
+                        react to reserve changes.
+                      </Typography>
+                    </div>
                   }
                 />
               </Box>
@@ -505,14 +531,40 @@ export default function App() {
                     <Typography variant="h6">Simulation</Typography>
                     <HelpText
                       text={
-                        <Typography>
-                          This chart shows a 52 week simulation of discrete
-                          transactions interacting with the token bonding curve.
-                          Each transaction adds or substract reserve to the
-                          system, modifying the price over time. The frequency,
-                          size and direction of each transaction is computed
-                          from a set of bounded random functions.
-                        </Typography>
+                        <div className={classes.descriptionContainer}>
+                          <div className={classes.descriptionPadding}>
+                            <Typography>
+                              This chart shows a 52 week simulation of discrete
+                              transactions interacting with the token bonding
+                              curve. Each transaction adds or substract reserve
+                              to the system, modifying the price over time. The
+                              frequency, size and direction of each transaction
+                              is computed from a set of bounded random
+                              functions.
+                            </Typography>
+                          </div>
+
+                          <table>
+                            <tbody>
+                              {simulationParameterDescriptions.map(
+                                ({ name, text }) => (
+                                  <tr key={name}>
+                                    <td>
+                                      <Typography
+                                        className={classes.descriptionName}
+                                      >
+                                        {name}
+                                      </Typography>
+                                    </td>
+                                    <td>
+                                      <Typography>{text}</Typography>
+                                    </td>
+                                  </tr>
+                                )
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
                       }
                     />
                   </Box>
