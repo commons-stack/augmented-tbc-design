@@ -24,14 +24,12 @@ export default function CurveDesignInputParams({
 
   const inputFields: InputFieldInterface[] = [
     {
-      label: "Initial raise",
+      label: "Initial raise (DAI)",
       value: d0,
       setter: setD0,
       min: 0.1e6,
       max: 10e6,
       step: 0.1e6,
-      unit: "$M",
-      prefix: "$",
       suffix: "M",
       format: (n: number) => `$${+(n * 1e-6).toFixed(1)}M`,
       toText: (n: number) => String(+(n * 1e-6).toFixed(1)),
