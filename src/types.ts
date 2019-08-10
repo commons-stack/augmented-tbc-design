@@ -1,5 +1,6 @@
 export interface InputFieldInterface {
   label: string;
+  description: string;
   value: number;
   setter(newValue: any): void;
   min: number;

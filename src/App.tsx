@@ -15,6 +15,12 @@ import SupplyVsDemandChart from "./SupplyVsDemandChart";
 import ResultParams from "./ResultParams";
 import PriceSimulationChart from "./PriceSimulationChart";
 import HelpText from "./HelpText";
+// Text content
+import {
+  parameterDescriptions,
+  simulationParameterDescriptions,
+  resultParameterDescriptions
+} from "./parametersDescriptions";
 // Utils
 import { getLast, getAvg, pause } from "./utils";
 import {
@@ -122,84 +128,16 @@ const useStyles = makeStyles((theme: Theme) =>
       }
     },
     descriptionTitle: {
-      fontWeight: theme.typography.fontWeightBold,
       padding: theme.spacing(0.5)
     },
-    descriptionName: {
-      fontWeight: theme.typography.fontWeightBold
+    descriptionBody: {
+      color: "#dbdfe4"
     },
     descriptionPadding: {
       padding: theme.spacing(0.5)
     }
   })
 );
-
-const parameterDescriptions = [
-  {
-    name: "Initial raise",
-    text: "Total funds raised in the hatch period of the ABC launch"
-  },
-  {
-    name: "Allocation to funding pool",
-    text:
-      "The percentage of the funds raised in the Hatch sale that go directly into the project funding pool to compensate future work done in the project"
-  },
-  {
-    name: "Hatch price",
-    text:
-      "The price paid per 'ABC token' by community members involved in hatching the project"
-  },
-  {
-    name: "Post-hatch price",
-    text:
-      "The price of the 'ABC token' when the curve enters the open phase and is live for public participation"
-  },
-  {
-    name: "Exit tribute",
-    text:
-      "The percentage of funds that are diverted to the project funding pool from community members who exit funds from the project by burning 'ABC tokens' in exchange for collateral"
-  }
-];
-
-const simulationParameterDescriptions = [
-  {
-    name: "Price",
-    text: "Price of the token over time."
-  },
-  {
-    name: "Floor price",
-    text:
-      "Lower bound of the price guaranteed by the vesting of hatch tokens. It decreases over time as more hatch tokens are allowed to be traded"
-  },
-  {
-    name: "Total exit tributes",
-    text:
-      "Cumulative sum of exit tributes collected from only exit /sell transactions"
-  }
-];
-
-const resultParameterDescriptions = [
-  {
-    name: "Total reserve",
-    text:
-      "Total DAI in the smart contract reserve at the end of the simulated period"
-  },
-  {
-    name: "Funds generated from initial hatch",
-    text:
-      "Fraction of the funds (theta) raised during the hatch that go directly to the cause (analytic result)"
-  },
-  {
-    name: "Funds generated from exit tributes",
-    text:
-      "Cumulative sum of exit tributes collected from only exit /sell transactions"
-  },
-  {
-    name: "Average slippage",
-    text:
-      "Average of the slippage of each transaction occured during the simulation period"
-  }
-];
 
 export default function App() {
   const [curveParams, setCurveParams] = useState({
@@ -386,14 +324,17 @@ export default function App() {
   const resultFields = [
     {
       label: `Total reserve`,
+      description: resultParameterDescriptions.totalReserve.text,
       value: (+totalReserve.toPrecision(3)).toLocaleString() + " DAI"
     },
     {
       label: `Funds generated from initial hatch`,
+      description: resultParameterDescriptions.initialHatchFunds.text,
       value: Math.round(d0 * theta).toLocaleString() + " DAI"
     },
     {
       label: `Funds generated from exit tributes (${withdrawCount} txs)`,
+      description: resultParameterDescriptions.exitTributes.text,
       value:
         (+getLast(withdrawFeeTimeseries).toPrecision(3)).toLocaleString() +
         " DAI"
@@ -402,6 +343,7 @@ export default function App() {
       label: `Average slippage (avg tx size ${Math.round(
         avgTxSize
       ).toLocaleString()} DAI)`,
+      description: resultParameterDescriptions.slippage.text,
       value: +(100 * avgSlippage).toFixed(3) + "%"
     }
   ];
@@ -432,15 +374,21 @@ export default function App() {
                       </div>
                       <table>
                         <tbody>
-                          {parameterDescriptions.map(({ name, text }) => (
+                          {[
+                            parameterDescriptions.theta,
+                            parameterDescriptions.p0,
+                            parameterDescriptions.p1,
+                            parameterDescriptions.wFee,
+                            parameterDescriptions.d0
+                          ].map(({ name, text }) => (
                             <tr key={name}>
                               <td>
-                                <Typography className={classes.descriptionName}>
-                                  {name}
-                                </Typography>
+                                <Typography>{name}</Typography>
                               </td>
                               <td>
-                                <Typography>{text}</Typography>
+                                <Typography className={classes.descriptionBody}>
+                                  {text}
+                                </Typography>
                               </td>
                             </tr>
                           ))}
@@ -478,7 +426,7 @@ export default function App() {
                 <HelpText
                   text={
                     <div className={classes.descriptionPadding}>
-                      <Typography>
+                      <Typography className={classes.descriptionBody}>
                         Visualization of the token bonding curve analytic
                         function on a specific range of reserve [0, 4 * R0].
                         This result is deterministic given the current set of
@@ -533,7 +481,7 @@ export default function App() {
                       text={
                         <div className={classes.descriptionContainer}>
                           <div className={classes.descriptionPadding}>
-                            <Typography>
+                            <Typography className={classes.descriptionBody}>
                               This chart shows a 52 week simulation of discrete
                               transactions interacting with the token bonding
                               curve. Each transaction adds or substract reserve
@@ -546,22 +494,22 @@ export default function App() {
 
                           <table>
                             <tbody>
-                              {simulationParameterDescriptions.map(
-                                ({ name, text }) => (
-                                  <tr key={name}>
-                                    <td>
-                                      <Typography
-                                        className={classes.descriptionName}
-                                      >
-                                        {name}
-                                      </Typography>
-                                    </td>
-                                    <td>
-                                      <Typography>{text}</Typography>
-                                    </td>
-                                  </tr>
-                                )
-                              )}
+                              {Object.values(
+                                simulationParameterDescriptions
+                              ).map(({ name, text }) => (
+                                <tr key={name}>
+                                  <td>
+                                    <Typography>{name}</Typography>
+                                  </td>
+                                  <td>
+                                    <Typography
+                                      className={classes.descriptionBody}
+                                    >
+                                      {text}
+                                    </Typography>
+                                  </td>
+                                </tr>
+                              ))}
                             </tbody>
                           </table>
                         </div>
@@ -595,18 +543,18 @@ export default function App() {
                           </div>
                           <table>
                             <tbody>
-                              {resultParameterDescriptions.map(
+                              {Object.values(resultParameterDescriptions).map(
                                 ({ name, text }) => (
                                   <tr key={name}>
                                     <td>
-                                      <Typography
-                                        className={classes.descriptionName}
-                                      >
-                                        {name}
-                                      </Typography>
+                                      <Typography>{name}</Typography>
                                     </td>
                                     <td>
-                                      <Typography>{text}</Typography>
+                                      <Typography
+                                        className={classes.descriptionBody}
+                                      >
+                                        {text}
+                                      </Typography>
                                     </td>
                                   </tr>
                                 )

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { InputFieldInterface, CurveParamsInterface } from "./types";
 import InputParams from "./InputParams";
+import { parameterDescriptions } from "./parametersDescriptions";
 
 export default function CurveDesignInputParams({
   curveParams,
@@ -42,6 +43,7 @@ export default function CurveDesignInputParams({
   const inputFields: InputFieldInterface[] = [
     {
       label: "Allocation to funding pool",
+      description: parameterDescriptions.theta.text,
       value: theta,
       setter: setTheta,
       min: 0,
@@ -54,6 +56,7 @@ export default function CurveDesignInputParams({
     },
     {
       label: "Hatch price (DAI/token)",
+      description: parameterDescriptions.p0.text,
       value: p0,
       setter: _setP0,
       min: 0.01,
@@ -65,6 +68,7 @@ export default function CurveDesignInputParams({
     },
     {
       label: "Post-hatch price (DAI/token)",
+      description: parameterDescriptions.p1.text,
       value: p1,
       setter: setP1,
       min: p0 || 0.1,
@@ -76,6 +80,7 @@ export default function CurveDesignInputParams({
     },
     {
       label: "Exit tribute",
+      description: parameterDescriptions.wFee.text,
       value: wFee,
       setter: setWFee,
       min: 0,

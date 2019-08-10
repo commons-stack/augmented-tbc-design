@@ -1,11 +1,11 @@
 import React from "react";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
-import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import NumberFormat from "react-number-format";
 import { InputFieldInterface } from "./types";
 import PrettoSlider from "./PrettoSlider";
+import TextWithPopover from "./TextWithPopover";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -81,6 +81,7 @@ export default function InputParams({
       {inputFields.map(
         ({
           label,
+          description,
           value,
           setter,
           min,
@@ -103,9 +104,7 @@ export default function InputParams({
           return (
             <Grid key={label} container spacing={0} className={classes.listBox}>
               <Grid item xs={6} className={classes.leftContainer}>
-                <Typography id={label} gutterBottom>
-                  {label}
-                </Typography>
+                <TextWithPopover content={label} popoverText={description} />
               </Grid>
 
               <Grid item xs={2} className={classes.centerContainer}>
