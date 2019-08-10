@@ -20,10 +20,16 @@ import { getLast, getAvg, pause } from "./utils";
 import {
   getInitialParams,
   getPriceR,
+  getMinPrice,
+  getS,
+  vest_tokens,
+  getMinR,
   getSlippage,
   getTxDistribution,
   getDeltaR_priceGrowth,
-  rv_U
+  rv_U,
+  getMedian,
+  getSum
 } from "./math";
 import { throttle } from "lodash";
 // General styles
@@ -199,7 +205,7 @@ export default function App() {
   const {
     k, // Invariant power kappa (.)
     R0, // Initial reserve (DAI)
-    // S0, // initial supply of tokens (token)
+    S0, // initial supply of tokens (token)
     V0 // invariant coef
   } = getInitialParams({
     d0,
@@ -210,6 +216,7 @@ export default function App() {
 
   const [priceTimeseries, setPriceTimeseries] = useState([0]);
   const [withdrawFeeTimeseries, setWithdrawFeeTimeseries] = useState([0]);
+  const [floorpriceTimeseries, setFloorpriceTimeseries] = useState([0]);
   const [totalReserve, setTotalReserve] = useState(R0);
   const [withdrawCount, setWithdrawCount] = useState(0);
   const [avgSlippage, setAvgSlippage] = useState(0);
@@ -248,48 +255,97 @@ export default function App() {
 
     async function simulateRandomDelta() {
       const R_t: number[] = [R0];
+      const S_t: number[] = [S0];
       const p_t: number[] = [getPriceR({ R: R0, V0, k })];
       const wFee_t: number[] = [0];
       const slippage_t: number[] = [];
       const avgTxSize_t: number[] = [];
 
+      // hatchers tokens = S0[section added by Z]
+      const H_t: number[] = [S0]; // total hatcher tokens not vested
+      const floorprice_t: number[] = []; // initially the price is the floor as all tokens are hatcher tokens
+
       // Random walk
       const numSteps = 52;
+      const u_min = 0.97;
+      const u_max = 1.04;
+      const tx_spread = 10;
+      // vesting(should this be exposed in the app ?)
+      const cliff = 8; // weeks before vesting starts ~2 months
+      const halflife = 52; // 26 weeks, half life is ~6 months
+      // percentage of the hatch tokens which vest per week(since that is our timescale in the sim)
 
       // numSteps = 52 take 8ms to run
       setSimulationRunning(true);
       for (let t = 0; t < numSteps; t++) {
-        const txsWeek = Math.ceil(t < 5 ? rv_U(0, 5) : rv_U(5, 2 * t));
-        const priceGrowth = rv_U(0.99, 1.03);
+        const txsWeek = rv_U(5, 2 * t + 5);
 
         const R = getLast(R_t);
-        const deltaR = getDeltaR_priceGrowth({ R, k, priceGrowth });
+        const S = getLast(S_t);
+        const H = getLast(H_t);
 
+        // enforce the effects of the unvested tokens not being burnable
+        let u_lower;
+        if (H === S) {
+          u_lower = 1;
+        } else {
+          const R_ratio = getMinR({ S, H, V0, k }) / R;
+          u_lower = Math.max(1 - R_ratio, u_min);
+        }
+        const priceGrowth = rv_U(u_lower, u_max);
+
+        const deltaR = getDeltaR_priceGrowth({ R, k, priceGrowth });
         const R_next = R + deltaR;
 
-        const txs = getTxDistribution({ sum: deltaR, num: txsWeek });
+        const txs = getTxDistribution({
+          sum: deltaR,
+          num: txsWeek,
+          spread: tx_spread
+        });
         // Compute slippage
-        const slippage = getAvg(
-          txs.map(txR => getSlippage({ R, deltaR: txR, V0, k }))
+        const slippage_txs = txs.map(txR =>
+          getSlippage({ R, deltaR: txR, V0, k })
         );
+        const slippage = getMedian(slippage_txs);
+
         const txsWithdraw = txs.filter(tx => tx < 0);
-        const wFees = -wFee * txsWithdraw.reduce((t, c) => t + c, 0);
-        const _avgTxSize =
-          txs.reduce((t, c) => t + Math.abs(c), 0) / txs.length;
+        const wFees = -wFee * getSum(txsWithdraw);
+        //  txsWithdraw.reduce((t, c) => t + c, 0);
+
+        // Vest
+        const delta_H = vest_tokens({ week: t, H, halflife, cliff });
+        const H_next = H - delta_H;
+
+        // find floor price
+        const S_next = getS({ R, V0, k });
+        const floorprice_next = getMinPrice({
+          S: S_next,
+          H: S0 - H_next,
+          V0,
+          k
+        });
+
+        const _avgTxSize = getMedian(txsWithdraw);
 
         R_t.push(R_next);
         p_t.push(getPriceR({ R: R_next, V0, k }));
         slippage_t.push(slippage);
         avgTxSize_t.push(_avgTxSize);
         wFee_t.push(getLast(wFee_t) + wFees);
+        H_t.push(H_next);
+        floorprice_t.push(floorprice_next);
         setWithdrawCount(c => c + txsWithdraw.length);
 
         // Stop the simulation if it's no longer active
         if (!simulationActive || !canContinueSimulation) break;
       }
 
+      // floorprice_t is missing one data point
+      floorprice_t[floorprice_t.length] = floorprice_t[floorprice_t.length - 1];
+
       setPriceTimeseries(p_t);
       setWithdrawFeeTimeseries(wFee_t);
+      setFloorpriceTimeseries(floorprice_t);
       setAvgSlippage(getAvg(slippage_t));
       setAvgTxSize(getAvg(avgTxSize_t));
       setTotalReserve(getLast(R_t));
@@ -465,6 +521,7 @@ export default function App() {
                     <PriceSimulationChart
                       priceTimeseries={priceTimeseries}
                       withdrawFeeTimeseries={withdrawFeeTimeseries}
+                      floorpriceTimeseries={floorpriceTimeseries}
                       p0={p0}
                       p1={p1}
                     />

@@ -17,6 +17,7 @@ import { linspace } from "./utils";
 const keyHorizontal = "x";
 const keyVerticalLeft = "Price (DAI/token)";
 const keyVerticalRight = "Total exit tributes (DAI)";
+const keyVerticalLeft2 = "Floor price (DAI/token)";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -32,11 +33,13 @@ const useStyles = makeStyles((theme: Theme) =>
 function PriceSimulationChart({
   priceTimeseries,
   withdrawFeeTimeseries,
+  floorpriceTimeseries,
   p0,
   p1
 }: {
   priceTimeseries: number[];
   withdrawFeeTimeseries: number[];
+  floorpriceTimeseries: number[];
   p0: number;
   p1: number;
 }) {
@@ -51,6 +54,7 @@ function PriceSimulationChart({
     data.push({
       [keyHorizontal]: t,
       [keyVerticalLeft]: priceTimeseries[t] || 0,
+      [keyVerticalLeft2]: floorpriceTimeseries[t] || 0,
       [keyVerticalRight]: withdrawFeeTimeseries[t] || 0
     });
   }
@@ -70,8 +74,8 @@ function PriceSimulationChart({
     const { textAnchor, viewBox, text } = props;
     return (
       <text
-        x={viewBox.x + 10}
-        y={viewBox.y - 10}
+        x={viewBox.x + 8}
+        y={viewBox.y + 17}
         fill={theme.palette.text.secondary}
         textAnchor={textAnchor}
       >
@@ -83,10 +87,12 @@ function PriceSimulationChart({
   function CustomTooltip({ active, payload, label }: any) {
     if (active) {
       const price = payload[0].value;
-      const exit = payload[1].value;
+      const floor = payload[1].value;
+      const exit = payload[2].value;
       const weekNum = label;
       const toolTipData: string[][] = [
         ["Price", price.toFixed(2), "DAI/tk"],
+        ["Floor", floor.toFixed(2), "DAI/tk"],
         ["Exit t.", formatter(exit), "DAI"],
         ["Week", weekNum, ""]
       ];
@@ -148,12 +154,10 @@ function PriceSimulationChart({
         {/* Capital collected from withdraw fees - AXIS */}
         <YAxis
           yAxisId="right"
-          // domain={[
-          //   Math.floor(Math.min(...withdrawFeeTimeseries)),
-          //   Math.ceil(Math.max(...withdrawFeeTimeseries))
-          // ]}
+          domain={[0, +(2 * withdrawFeeTimeseries.slice(-1)[0]).toPrecision(1)]}
           orientation="right"
           tick={{ fill: theme.palette.text.secondary }}
+          tickFormatter={formatter}
           stroke={theme.palette.text.secondary}
         />
 
@@ -166,7 +170,20 @@ function PriceSimulationChart({
           dataKey={keyVerticalLeft}
           stroke={theme.palette.primary.main}
           fill={theme.palette.primary.main}
+          fillOpacity={0.3}
+          strokeWidth={2}
         />
+        <Area
+          isAnimationActive={false}
+          yAxisId="left"
+          type="monotone"
+          dataKey={keyVerticalLeft2}
+          stroke={"#adcd2e"}
+          fill={"#adcd2e"}
+          fillOpacity={0.05}
+          strokeWidth={2}
+        />
+
         <ReferenceLine
           y={p0}
           yAxisId="left"
@@ -188,9 +205,10 @@ function PriceSimulationChart({
           yAxisId="right"
           type="monotone"
           dataKey={keyVerticalRight}
-          stroke={theme.palette.secondary.dark}
+          stroke={"#0085ff"}
           fill={theme.palette.secondary.dark}
-          fillOpacity="0.8"
+          fillOpacity={0.5}
+          strokeWidth={2}
         />
 
         {/* <ReferenceLine

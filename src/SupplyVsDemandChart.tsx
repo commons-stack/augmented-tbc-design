@@ -186,6 +186,8 @@ function SupplyVsDemandChart({
           dataKey={keyVertical}
           stroke={theme.palette.primary.main}
           fill={theme.palette.primary.main}
+          fillOpacity={0.3}
+          strokeWidth={2}
         />
         <ReferenceLine
           x={R0_round}
