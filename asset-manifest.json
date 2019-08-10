@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/augmented-tbc-design/static/css/main.837772ec.chunk.css",
-    "main.js": "/augmented-tbc-design/static/js/main.0bbff1ff.chunk.js",
-    "main.js.map": "/augmented-tbc-design/static/js/main.0bbff1ff.chunk.js.map",
+    "main.js": "/augmented-tbc-design/static/js/main.a231de29.chunk.js",
+    "main.js.map": "/augmented-tbc-design/static/js/main.a231de29.chunk.js.map",
     "runtime~main.js": "/augmented-tbc-design/static/js/runtime~main.1a6ed195.js",
     "runtime~main.js.map": "/augmented-tbc-design/static/js/runtime~main.1a6ed195.js.map",
-    "static/js/2.a7ca91e7.chunk.js": "/augmented-tbc-design/static/js/2.a7ca91e7.chunk.js",
-    "static/js/2.a7ca91e7.chunk.js.map": "/augmented-tbc-design/static/js/2.a7ca91e7.chunk.js.map",
+    "static/js/2.0fdd9091.chunk.js": "/augmented-tbc-design/static/js/2.0fdd9091.chunk.js",
+    "static/js/2.0fdd9091.chunk.js.map": "/augmented-tbc-design/static/js/2.0fdd9091.chunk.js.map",
     "index.html": "/augmented-tbc-design/index.html",
-    "precache-manifest.6a24d5f59c0bd7fd22390061011443c3.js": "/augmented-tbc-design/precache-manifest.6a24d5f59c0bd7fd22390061011443c3.js",
+    "precache-manifest.c5bfa49bcdc6fc609c076e042673467f.js": "/augmented-tbc-design/precache-manifest.c5bfa49bcdc6fc609c076e042673467f.js",
     "service-worker.js": "/augmented-tbc-design/service-worker.js",
     "static/css/main.837772ec.chunk.css.map": "/augmented-tbc-design/static/css/main.837772ec.chunk.css.map"
   }
