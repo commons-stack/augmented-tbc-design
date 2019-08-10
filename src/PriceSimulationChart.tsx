@@ -10,8 +10,24 @@ import {
   ResponsiveContainer,
   Tooltip
 } from "recharts";
+import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import { useTheme } from "@material-ui/styles";
 import { linspace } from "./utils";
+
+const keyHorizontal = "x";
+const keyVerticalLeft = "Price (DAI/token)";
+const keyVerticalRight = "Total exit tributes (DAI)";
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    tooltip: {
+      border: "1px solid #313d47",
+      backgroundColor: "#384b59",
+      padding: theme.spacing(1),
+      color: "#c7ccd2"
+    }
+  })
+);
 
 function PriceSimulationChart({
   priceTimeseries,
@@ -30,10 +46,6 @@ function PriceSimulationChart({
   // returnF - Return factor (.)
   // wFee    - friction coefficient (.)
 
-  const keyHorizontal = "x";
-  const keyVerticalLeft = "Price (DAI / token)";
-  const keyVerticalRight = "Total exit tributes (DAI)";
-
   const data = [];
   for (let t = 0; t < priceTimeseries.length; t++) {
     data.push({
@@ -46,6 +58,7 @@ function PriceSimulationChart({
   // Chart components
 
   const theme: any = useTheme();
+  const classes = useStyles();
 
   function renderColorfulLegendText(value: string) {
     return <span style={{ color: theme.palette.text.secondary }}>{value}</span>;
@@ -65,6 +78,35 @@ function PriceSimulationChart({
         {text}
       </text>
     );
+  }
+
+  function CustomTooltip({ active, payload, label }: any) {
+    if (active) {
+      const price = payload[0].value;
+      const exit = payload[1].value;
+      const weekNum = label;
+      const toolTipData: string[][] = [
+        ["Price", price.toFixed(2), "DAI/tk"],
+        ["Exit t.", formatter(exit), "DAI"],
+        ["Week", weekNum, ""]
+      ];
+
+      return (
+        <div className={classes.tooltip}>
+          <table>
+            <tbody>
+              {toolTipData.map(([name, value, unit]) => (
+                <tr key={name}>
+                  <td>{name}</td>
+                  <td>{value}</td>
+                  <td>{unit}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    } else return null;
   }
 
   return (
@@ -115,7 +157,7 @@ function PriceSimulationChart({
           stroke={theme.palette.text.secondary}
         />
 
-        <Tooltip formatter={value => Number(value)} />
+        <Tooltip content={<CustomTooltip />} />
 
         <Area
           isAnimationActive={false}
@@ -146,8 +188,9 @@ function PriceSimulationChart({
           yAxisId="right"
           type="monotone"
           dataKey={keyVerticalRight}
-          stroke={theme.palette.secondary.main}
-          fill={theme.palette.secondary.main}
+          stroke={theme.palette.secondary.dark}
+          fill={theme.palette.secondary.dark}
+          fillOpacity="0.8"
         />
 
         {/* <ReferenceLine

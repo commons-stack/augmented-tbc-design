@@ -9,7 +9,8 @@ import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 // Components
 import Header from "./Header";
-import InputParams from "./InputParams";
+import CurveDesignInputParams from "./CurveDesignInputParams";
+import SimulationInputParams from "./SimulationInputParams";
 import SupplyVsDemandChart from "./SupplyVsDemandChart";
 import ResultParams from "./ResultParams";
 import PriceSimulationChart from "./PriceSimulationChart";
@@ -53,8 +54,7 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: "#293640"
     },
     box: {
-      padding: theme.spacing(3, 3),
-      minHeight: 310
+      padding: theme.spacing(3, 3)
     },
     boxButton: {
       padding: theme.spacing(3, 3)
@@ -65,6 +65,12 @@ const useStyles = makeStyles((theme: Theme) =>
       display: "flex",
       alignItems: "center",
       borderBottom: "1px solid #313d47"
+    },
+    boxBorderBottom: {
+      borderBottom: "1px solid #313d47"
+    },
+    initialRaise: {
+      justifyContent: "space-between"
     },
     boxChart: {
       width: "100%",
@@ -93,7 +99,8 @@ const useStyles = makeStyles((theme: Theme) =>
       marginBottom: -theme.spacing(headerOffset)
     },
     button: {
-      background: "linear-gradient(290deg, #2ad179, #4ab47c)",
+      // background: "linear-gradient(290deg, #2ad179, #4ab47c)", // Green gradient
+      background: "linear-gradient(290deg, #1880e0, #3873d8)", // blue gradient
       color: "white"
     },
     // Descriptions
@@ -170,11 +177,11 @@ const resultParameterDescriptions = [
 
 export default function App() {
   const [curveParams, setCurveParams] = useState({
-    d0: 1e6, // Initial raise, d0 (DAI)
     theta: 0.35, // fraction allocated to reserve (.)
     p0: 0.1, // Hatch sale price p0 (DAI / token)
     p1: 0.3, // Return factor (.)
-    wFee: 0.05 // friction coefficient (.)
+    wFee: 0.05, // friction coefficient (.)
+    d0: 3e6 // Initial raise, d0 (DAI)
   });
 
   const { d0, theta, p0, p1, wFee } = curveParams;
@@ -321,6 +328,7 @@ export default function App() {
   ];
 
   const classes = useStyles();
+
   return (
     <>
       <header className={classes.header}>
@@ -364,8 +372,22 @@ export default function App() {
                 />
               </Box>
 
+              <Box className={`${classes.box} ${classes.boxBorderBottom}`}>
+                <CurveDesignInputParams
+                  curveParams={curveParams}
+                  setCurveParams={setCurveParamsThrottle}
+                />
+              </Box>
+
+              <Box className={`${classes.boxHeader} ${classes.initialRaise}`}>
+                <Typography variant="h6">Run parameters</Typography>
+              </Box>
+
               <Box className={classes.box}>
-                <InputParams setCurveParams={setCurveParamsThrottle} />
+                <SimulationInputParams
+                  curveParams={curveParams}
+                  setCurveParams={setCurveParamsThrottle}
+                />
               </Box>
             </Paper>
           </Grid>

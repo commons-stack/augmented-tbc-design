@@ -10,9 +10,24 @@ import {
   ResponsiveContainer,
   Tooltip
 } from "recharts";
+import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import { getLinspaceTicks } from "./utils";
-import { getInitialParams } from "./math";
+import { getInitialParams, getPriceR } from "./math";
 import { useTheme } from "@material-ui/styles";
+
+const keyHorizontal = "x";
+const keyVertical = "Supply (tokens) / Reserve (DAI)";
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    tooltip: {
+      border: "1px solid #313d47",
+      backgroundColor: "#384b59",
+      padding: theme.spacing(1),
+      color: "#c7ccd2"
+    }
+  })
+);
 
 function SupplyVsDemandChart({
   theta,
@@ -35,21 +50,23 @@ function SupplyVsDemandChart({
   const {
     k, // Invariant power kappa (.)
     R0, // Initial reserve (DAI)
-    S0 // initial supply of tokens (token)
+    S0, // initial supply of tokens (token)
+    V0 // invariant coef
   } = getInitialParams({
     d0,
     theta,
     p0,
     p1
   });
-  const S_of_R = (R: number) => S0 * (R / R0) ** (1 / k);
+  const R0_round = Math.round(R0);
+  const S_of_R = (R: number) => S0 * (R / R0_round) ** (1 / k);
 
   // Function setup
   const f = S_of_R;
   const from = 0;
-  const to = 4 * R0;
+  const to = 4 * R0_round;
   const steps = 100 + 1; // Add 1 for the ticks to match
-  const step = (to - from) / steps;
+  const step = Math.round((to - from) / (steps - 1));
 
   /**
    * Prettify the result converting 1000000 to 1M
@@ -68,12 +85,9 @@ function SupplyVsDemandChart({
       : // No scale
         [1, ""];
 
-  const keyHorizontal = "x";
-  const keyVertical = "Supply (tokens) / Reserve (DAI)";
-
   const data = [];
   for (let i = 0; i < steps; i++) {
-    const x = from + step * i;
+    const x = Math.round(from + step * i);
     data.push({
       [keyHorizontal]: x,
       [keyVertical]: f(x)
@@ -83,6 +97,7 @@ function SupplyVsDemandChart({
   // Chart components
 
   const theme: any = useTheme();
+  const classes = useStyles();
 
   const formatter = (n: number) =>
     (+(n / scaling).toPrecision(2)).toLocaleString();
@@ -103,6 +118,34 @@ function SupplyVsDemandChart({
         Initial value
       </text>
     );
+  }
+
+  function CustomTooltip({ active, payload, label }: any) {
+    if (active) {
+      const supply = payload[0].value;
+      const reserve = label;
+      const price = getPriceR({ R: reserve, V0, k });
+      const toolTipData: string[][] = [
+        ["Supply", formatter(supply) + unit, "tokens"],
+        ["Reserve", formatter(reserve) + unit, "DAI"],
+        ["Price", price.toFixed(2), "DAI/token"]
+      ];
+      return (
+        <div className={classes.tooltip}>
+          <table>
+            <tbody>
+              {toolTipData.map(([name, value, unit]) => (
+                <tr key={name}>
+                  <td>{name}</td>
+                  <td>{value}</td>
+                  <td>{unit}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    } else return null;
   }
 
   return (
@@ -136,7 +179,7 @@ function SupplyVsDemandChart({
           domain={[0, f(to)]}
           stroke={theme.palette.text.secondary}
         />
-        <Tooltip formatter={value => formatter(Number(value))} />
+        <Tooltip content={<CustomTooltip />} />
         <Area
           isAnimationActive={false}
           type="monotone"
@@ -145,7 +188,7 @@ function SupplyVsDemandChart({
           fill={theme.palette.primary.main}
         />
         <ReferenceLine
-          x={R0}
+          x={R0_round}
           stroke={theme.palette.primary.main}
           strokeDasharray="9 0"
           label={<ReferenceLabel />}

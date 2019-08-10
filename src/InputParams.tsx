@@ -1,47 +1,11 @@
-import React, { useState } from "react";
-import {
-  createStyles,
-  makeStyles,
-  withStyles,
-  Theme
-} from "@material-ui/core/styles";
+import React from "react";
+import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
-import Slider from "@material-ui/core/Slider";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import NumberFormat from "react-number-format";
-
-const PrettoSlider = withStyles({
-  root: {
-    height: 8
-  },
-  thumb: {
-    height: 24,
-    width: 24,
-    backgroundColor: "#fff",
-    border: "2px solid currentColor",
-    marginTop: -8,
-    marginLeft: -12,
-    "&:focus,&:hover,&$active": {
-      boxShadow: "inherit"
-    }
-  },
-  active: {},
-  valueLabel: {
-    left: "calc(-50% + 4px)"
-  },
-  track: {
-    height: 8,
-    borderRadius: 4
-  },
-  rail: {
-    height: 8,
-    borderRadius: 4
-  },
-  markLabel: {
-    top: 30
-  }
-})(Slider);
+import { InputFieldInterface } from "./types";
+import PrettoSlider from "./PrettoSlider";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -79,6 +43,9 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     slider: {
       color: theme.palette.primary.main
+    },
+    secondaryColor: {
+      color: theme.palette.secondary.light
     }
   })
 );
@@ -101,118 +68,12 @@ function NumberFormatCustom(props: any) {
 }
 
 export default function InputParams({
-  curveParams,
-  setCurveParams
+  inputFields,
+  onChangeCommited
 }: {
-  curveParams?: {
-    d0: number;
-    theta: number;
-    p0: number;
-    p1: number;
-    wFee: number;
-  };
-  setCurveParams(newCurveParams: any): void;
+  inputFields: InputFieldInterface[];
+  onChangeCommited(): void;
 }) {
-  const [d0, setD0] = useState(1e6); // Initial raise, d0 (DAI)
-  const [theta, setTheta] = useState(0.35); // fraction allocated to reserve (.)
-  const [p0, setP0] = useState(0.1); // Hatch sale Price p0 (DAI / token)
-  const [p1, setP1] = useState(0.3); // Return factor (.)
-  const [wFee, setWFee] = useState(0.05); // friction coefficient (.)
-
-  function _setP0(newP0: number) {
-    setP0(newP0);
-    if (p1 < newP0) setP1(newP0);
-    else if (p1 > newP0 * maxReturnRate) setP1(newP0 * maxReturnRate);
-  }
-
-  function setParentCurveParams() {
-    setCurveParams({ d0, theta, p0, p1, wFee });
-  }
-
-  const maxReturnRate = 10;
-
-  const inputFields: {
-    label: string;
-    value: number;
-    setter(newValue: any): void;
-    min: number;
-    max: number;
-    step: number;
-    unit?: string;
-    prefix?: string;
-    suffix?: string;
-    toText?(value: number): string;
-    toNum?(value: string): number;
-    format(value: number): string;
-  }[] = [
-    {
-      label: "Initial raise",
-      value: d0,
-      setter: setD0,
-      min: 0.1e6,
-      max: 10e6,
-      step: 0.1e6,
-      unit: "$M",
-      prefix: "$",
-      suffix: "M",
-      format: (n: number) => `$${+(n * 1e-6).toFixed(1)}M`,
-      toText: (n: number) => String(+(n * 1e-6).toFixed(1)),
-      toNum: (n: string) => Math.floor(parseFloat(n) * 1e6)
-    },
-    {
-      label: "Allocation to funding pool",
-      value: theta,
-      setter: setTheta,
-      min: 0,
-      max: 0.9,
-      step: 0.01,
-      unit: "%",
-      suffix: "%",
-      format: (n: number) => `${Math.round(100 * n)}%`,
-      toText: (n: number) => String(+(n * 1e2).toFixed(0)),
-      toNum: (n: string) => parseFloat(n) * 1e-2
-    },
-    {
-      label: "Hatch price",
-      value: p0,
-      setter: _setP0,
-      min: 0.01,
-      max: 1,
-      step: 0.01,
-      unit: "$",
-      prefix: "$",
-      toText: (n: number) => String(+n.toFixed(2)),
-      toNum: (n: string) => parseFloat(n),
-      format: (n: number) => `$${n}`
-    },
-    {
-      label: "Post-hatch price",
-      value: p1,
-      setter: setP1,
-      min: p0 || 0.1,
-      max: Number((maxReturnRate * p0).toFixed(2)),
-      step: 0.01,
-      unit: "$",
-      prefix: "$",
-      toText: (n: number) => String(+n.toFixed(2)),
-      toNum: (n: string) => parseFloat(n),
-      format: (n: number) => `$${n}`
-    },
-    {
-      label: "Exit tribute",
-      value: wFee,
-      setter: setWFee,
-      min: 0,
-      max: 0.1,
-      step: 0.001,
-      unit: "%",
-      suffix: "%",
-      format: (n: number) => `${+(100 * n).toFixed(1)}%`,
-      toText: (n: number) => String(+(n * 1e2).toFixed(1)),
-      toNum: (n: string) => parseFloat(n) * 1e-2
-    }
-  ];
-
   const classes = useStyles();
 
   return (
@@ -227,6 +88,7 @@ export default function InputParams({
           step,
           prefix,
           suffix,
+          secondaryColor,
           format,
           toText,
           toNum
@@ -253,7 +115,7 @@ export default function InputParams({
                     sanitizeInput(
                       toNum ? toNum(e.target.value) : parseFloat(e.target.value)
                     );
-                    setParentCurveParams();
+                    onChangeCommited();
                   }}
                   InputProps={{
                     inputComponent: NumberFormatCustom,
@@ -269,12 +131,14 @@ export default function InputParams({
 
               <Grid item xs={4}>
                 <PrettoSlider
-                  className={classes.slider}
+                  className={`${classes.slider} ${
+                    secondaryColor ? classes.secondaryColor : ""
+                  }`}
                   valueLabelDisplay="auto"
                   aria-label={label}
                   defaultValue={value}
                   onChange={(_, newValue) => sanitizeInput(Number(newValue))}
-                  onChangeCommitted={setParentCurveParams}
+                  onChangeCommitted={onChangeCommited}
                   value={value}
                   min={min}
                   max={max}
