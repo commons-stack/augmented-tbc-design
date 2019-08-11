@@ -58,7 +58,7 @@ export default function Header() {
       </Typography>
 
       <Typography className={classes.subtitle}>
-        Experiment and test augmented token bonding curves
+        Experiment and test augmented bonding curves
       </Typography>
       <Typography className={classes.subsubtitle}>
         A narrative showcase of <Link href={cadCadLink}>cadCAD</Link>

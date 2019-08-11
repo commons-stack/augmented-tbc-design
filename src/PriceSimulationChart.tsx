@@ -18,6 +18,8 @@ const keyHorizontal = "x";
 const keyVerticalLeft = "Price (DAI/token)";
 const keyVerticalLeft2 = "Floor price (DAI/token)";
 const keyVerticalRight = "Total funds raised (DAI)";
+const p1LineText = "Post-Hatch price";
+const p0LineText = "Hatch price";
 
 // Do to transparency and color merging issues
 // these colors are handpicked to look the closest to the theme colors
@@ -224,15 +226,13 @@ function PriceSimulationChart({
           y={p0}
           yAxisId="left"
           stroke={theme.palette.primary.main}
-          // strokeDasharray="9 0"
-          label={<ReferenceLabel text="Hatch sale price" />}
+          label={<ReferenceLabel text={p0LineText} />}
         />
         <ReferenceLine
           y={p1}
           yAxisId="left"
           stroke={theme.palette.primary.main}
-          // strokeDasharray="9 0"
-          label={<ReferenceLabel text="After hatch price" />}
+          label={<ReferenceLabel text={p1LineText} />}
         />
 
         {/* Capital collected from withdraw fees - AREA */}

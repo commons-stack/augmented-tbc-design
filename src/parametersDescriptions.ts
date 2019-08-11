@@ -70,8 +70,8 @@ export const resultParameterDescriptions: DescriptionObject = {
       "Cumulative sum of exit tributes collected from only exit / sell / burn transactions"
   },
   slippage: {
-    name: "Average slippage",
+    name: "Median slippage",
     text:
-      "Average of change in price a user experiences from the current price to the price received for exiting/selling/burning"
+      "Median of change in price a user experiences from the current price to the price received for exiting/selling/burning"
   }
 };
