@@ -7,6 +7,8 @@ import {
   CartesianGrid,
   Legend,
   ReferenceLine,
+  ReferenceDot,
+  ReferenceArea,
   ResponsiveContainer,
   Tooltip
 } from "recharts";
@@ -18,6 +20,10 @@ import { useTheme } from "@material-ui/styles";
 const isAnimationActive = false;
 const keyHorizontal = "x";
 const keyVertical = "Supply (tokens) / Collateral (DAI)";
+
+// Do to transparency and color merging issues
+// these colors are handpicked to look the closest to the theme colors
+const referenceLineColor = "#b7c1cb";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -100,12 +106,12 @@ function SupplyVsDemandChart({
     const { textAnchor, viewBox } = props;
     return (
       <text
-        x={viewBox.x + 10}
-        y={30}
-        fill={theme.palette.text.secondary}
+        x={viewBox.x + viewBox.width / 4 + 10}
+        y={viewBox.y + 20}
+        fill={referenceLineColor}
         textAnchor={textAnchor}
       >
-        Initial value
+        Initial Token Supply
       </text>
     );
   }
@@ -183,12 +189,22 @@ function SupplyVsDemandChart({
           fillOpacity={0.3}
           strokeWidth={2}
         />
+        {/* Necessary because ReferenceDot types do not allow "label" k */}
         <ReferenceLine
           x={R0_round}
-          stroke={theme.palette.primary.main}
+          y={f(R0_round)}
+          stroke={"transparent"}
           strokeDasharray="9 0"
           label={<ReferenceLabel />}
         />
+        <ReferenceDot
+          x={R0_round}
+          y={f(R0_round)}
+          r={6}
+          fill={theme.palette.primary.main}
+          stroke={2}
+        />
+
         <Legend formatter={renderColorfulLegendText} />
       </AreaChart>
     </ResponsiveContainer>

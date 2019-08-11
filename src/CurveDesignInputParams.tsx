@@ -10,11 +10,11 @@ export default function CurveDesignInputParams({
   curveParams: CurveParamsInterface;
   setCurveParams(newCurveParams: any): void;
 }) {
-  const [theta, setTheta] = useState(0.35); // fraction allocated to reserve (.)
-  const [p0, setP0] = useState(0.1); // Hatch sale Price p0 (DAI / token)
-  const [p1, setP1] = useState(0.3); // Return factor (.)
-  const [wFee, setWFee] = useState(0.05); // friction coefficient (.)
-  const [vHalflife, setVHalflife] = useState(52); // friction coefficient (.)
+  const [theta, setTheta] = useState(curveParams.theta); // fraction allocated to reserve (.)
+  const [p0, setP0] = useState(curveParams.p0); // Hatch sale Price p0 (DAI / token)
+  const [p1, setP1] = useState(curveParams.p1); // Return factor (.)
+  const [wFee, setWFee] = useState(curveParams.wFee); // friction coefficient (.)
+  const [vHalflife, setVHalflife] = useState(curveParams.vHalflife); // friction coefficient (.)
 
   useEffect(() => {
     setTheta(curveParams.theta);
