@@ -2,6 +2,7 @@ import React from "react";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
+import TextWithPopover from "./TextWithPopover";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -45,6 +46,7 @@ export default function ResultParams({
 }: {
   resultFields: {
     label: string;
+    description: string;
     value: number | string;
   }[];
 }) {
@@ -52,12 +54,10 @@ export default function ResultParams({
 
   return (
     <div className={classes.listBoxContainer}>
-      {resultFields.map(({ label, value }) => (
+      {resultFields.map(({ label, description, value }) => (
         <Grid key={label} container spacing={0} className={classes.listBox}>
           <Grid item xs={8} className={classes.leftContainer}>
-            <Typography id={label} gutterBottom>
-              {label}
-            </Typography>
+            <TextWithPopover content={label} popoverText={description} />
           </Grid>
 
           <Grid item xs={4} className={classes.centerContainer}>

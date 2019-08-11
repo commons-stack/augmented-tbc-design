@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { InputFieldInterface, CurveParamsInterface } from "./types";
 import InputParams from "./InputParams";
+import { parameterDescriptions } from "./parametersDescriptions";
 
 export default function CurveDesignInputParams({
   curveParams,
@@ -25,6 +26,7 @@ export default function CurveDesignInputParams({
   const inputFields: InputFieldInterface[] = [
     {
       label: "Initial raise (DAI)",
+      description: parameterDescriptions.d0.text,
       value: d0,
       setter: setD0,
       min: 0.1e6,

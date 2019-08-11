@@ -15,15 +15,27 @@ import SupplyVsDemandChart from "./SupplyVsDemandChart";
 import ResultParams from "./ResultParams";
 import PriceSimulationChart from "./PriceSimulationChart";
 import HelpText from "./HelpText";
+// Text content
+import {
+  parameterDescriptions,
+  simulationParameterDescriptions,
+  resultParameterDescriptions
+} from "./parametersDescriptions";
 // Utils
 import { getLast, getAvg, pause } from "./utils";
 import {
   getInitialParams,
   getPriceR,
+  getMinPrice,
+  getS,
+  vest_tokens,
+  getR,
   getSlippage,
   getTxDistribution,
   getDeltaR_priceGrowth,
-  rv_U
+  rv_U,
+  getMedian,
+  getSum
 } from "./math";
 import { throttle } from "lodash";
 // General styles
@@ -116,64 +128,16 @@ const useStyles = makeStyles((theme: Theme) =>
       }
     },
     descriptionTitle: {
-      fontWeight: theme.typography.fontWeightBold,
       padding: theme.spacing(0.5)
     },
-    descriptionName: {
-      fontWeight: theme.typography.fontWeightBold
+    descriptionBody: {
+      color: "#dbdfe4"
+    },
+    descriptionPadding: {
+      padding: theme.spacing(0.5)
     }
   })
 );
-
-const parameterDescriptions = [
-  {
-    name: "Initial raise",
-    text: "Total funds raised in the hatch period of the ABC launch"
-  },
-  {
-    name: "Allocation to funding pool",
-    text:
-      "The percentage of the funds raised in the Hatch sale that go directly into the project funding pool to compensate future work done in the project"
-  },
-  {
-    name: "Hatch price",
-    text:
-      "The price paid per 'ABC token' by community members involved in hatching the project"
-  },
-  {
-    name: "Post-hatch price",
-    text:
-      "The price of the 'ABC token' when the curve enters the open phase and is live for public participation"
-  },
-  {
-    name: "Exit tribute",
-    text:
-      "The percentage of funds that are diverted to the project funding pool from community members who exit funds from the project by burning 'ABC tokens' in exchange for collateral"
-  }
-];
-
-const resultParameterDescriptions = [
-  {
-    name: "Total reserve",
-    text:
-      "Total DAI in the smart contract reserve at the end of the simulated period"
-  },
-  {
-    name: "Funds generated from initial hatch",
-    text:
-      "Fraction of the funds (theta) raised during the hatch that go directly to the cause"
-  },
-  {
-    name: "Funds generated from exit tributes",
-    text:
-      "Cumulative amount of exit tributes collected from only exit /sell transactions"
-  },
-  {
-    name: "Average slippage",
-    text:
-      "Average of the slippage of each transaction occured during the simulation period"
-  }
-];
 
 export default function App() {
   const [curveParams, setCurveParams] = useState({
@@ -199,7 +163,7 @@ export default function App() {
   const {
     k, // Invariant power kappa (.)
     R0, // Initial reserve (DAI)
-    // S0, // initial supply of tokens (token)
+    S0, // initial supply of tokens (token)
     V0 // invariant coef
   } = getInitialParams({
     d0,
@@ -210,6 +174,7 @@ export default function App() {
 
   const [priceTimeseries, setPriceTimeseries] = useState([0]);
   const [withdrawFeeTimeseries, setWithdrawFeeTimeseries] = useState([0]);
+  const [floorpriceTimeseries, setFloorpriceTimeseries] = useState([0]);
   const [totalReserve, setTotalReserve] = useState(R0);
   const [withdrawCount, setWithdrawCount] = useState(0);
   const [avgSlippage, setAvgSlippage] = useState(0);
@@ -248,48 +213,100 @@ export default function App() {
 
     async function simulateRandomDelta() {
       const R_t: number[] = [R0];
+      const S_t: number[] = [S0];
       const p_t: number[] = [getPriceR({ R: R0, V0, k })];
       const wFee_t: number[] = [0];
       const slippage_t: number[] = [];
       const avgTxSize_t: number[] = [];
 
+      // hatchers tokens = S0[section added by Z]
+      const H_t: number[] = [S0]; // total hatcher tokens not vested
+      const floorprice_t: number[] = []; // initially the price is the floor as all tokens are hatcher tokens
+
       // Random walk
       const numSteps = 52;
+      const u_min = 0.97;
+      const u_max = 1.04;
+      const tx_spread = 10;
+      // vesting(should this be exposed in the app ?)
+      const cliff = 8; // weeks before vesting starts ~2 months
+      const halflife = 52; // 26 weeks, half life is ~6 months
+      // percentage of the hatch tokens which vest per week(since that is our timescale in the sim)
 
       // numSteps = 52 take 8ms to run
       setSimulationRunning(true);
       for (let t = 0; t < numSteps; t++) {
-        const txsWeek = Math.ceil(t < 5 ? rv_U(0, 5) : rv_U(5, 2 * t));
-        const priceGrowth = rv_U(0.99, 1.03);
+        const txsWeek = rv_U(5, 2 * t + 5);
 
         const R = getLast(R_t);
-        const deltaR = getDeltaR_priceGrowth({ R, k, priceGrowth });
+        const S = getLast(S_t);
+        const H = getLast(H_t);
 
+        // enforce the effects of the unvested tokens not being burnable
+        let u_lower;
+        if (H > S) {
+          u_lower = 1;
+        } else {
+          // compute the reserve if all that supply is burned
+          const R_ratio = getR({ S: S - H, V0, k }) / R;
+          u_lower = Math.max(1 - R_ratio, u_min);
+        }
+        const priceGrowth = rv_U(u_lower, u_max);
+
+        const deltaR = getDeltaR_priceGrowth({ R, k, priceGrowth });
         const R_next = R + deltaR;
 
-        const txs = getTxDistribution({ sum: deltaR, num: txsWeek });
+        const txs = getTxDistribution({
+          sum: deltaR,
+          num: txsWeek,
+          spread: tx_spread
+        });
         // Compute slippage
-        const slippage = getAvg(
-          txs.map(txR => getSlippage({ R, deltaR: txR, V0, k }))
+        const slippage_txs = txs.map(txR =>
+          getSlippage({ R, deltaR: txR, V0, k })
         );
+        const slippage = getMedian(slippage_txs);
+
         const txsWithdraw = txs.filter(tx => tx < 0);
-        const wFees = -wFee * txsWithdraw.reduce((t, c) => t + c, 0);
-        const _avgTxSize =
-          txs.reduce((t, c) => t + Math.abs(c), 0) / txs.length;
+        const wFees = -wFee * getSum(txsWithdraw);
+        //  txsWithdraw.reduce((t, c) => t + c, 0);
+
+        // Vest
+        const delta_H = vest_tokens({ week: t, H, halflife, cliff });
+        const H_next = H - delta_H;
+
+        // find floor price
+        const S_next = getS({ R, V0, k });
+        const floorprice_next = getMinPrice({
+          S: S_next,
+          H: S0 - H_next,
+          V0,
+          k
+        });
+
+        const _avgTxSize = getMedian(txsWithdraw);
 
         R_t.push(R_next);
+        S_t.push(S_next);
+        H_t.push(H_next);
         p_t.push(getPriceR({ R: R_next, V0, k }));
         slippage_t.push(slippage);
         avgTxSize_t.push(_avgTxSize);
         wFee_t.push(getLast(wFee_t) + wFees);
+
+        floorprice_t.push(floorprice_next);
         setWithdrawCount(c => c + txsWithdraw.length);
 
         // Stop the simulation if it's no longer active
         if (!simulationActive || !canContinueSimulation) break;
       }
 
+      // floorprice_t is missing one data point
+      floorprice_t[floorprice_t.length] = floorprice_t[floorprice_t.length - 1];
+
       setPriceTimeseries(p_t);
       setWithdrawFeeTimeseries(wFee_t);
+      setFloorpriceTimeseries(floorprice_t);
       setAvgSlippage(getAvg(slippage_t));
       setAvgTxSize(getAvg(avgTxSize_t));
       setTotalReserve(getLast(R_t));
@@ -307,14 +324,17 @@ export default function App() {
   const resultFields = [
     {
       label: `Total reserve`,
+      description: resultParameterDescriptions.totalReserve.text,
       value: (+totalReserve.toPrecision(3)).toLocaleString() + " DAI"
     },
     {
       label: `Funds generated from initial hatch`,
+      description: resultParameterDescriptions.initialHatchFunds.text,
       value: Math.round(d0 * theta).toLocaleString() + " DAI"
     },
     {
       label: `Funds generated from exit tributes (${withdrawCount} txs)`,
+      description: resultParameterDescriptions.exitTributes.text,
       value:
         (+getLast(withdrawFeeTimeseries).toPrecision(3)).toLocaleString() +
         " DAI"
@@ -323,6 +343,7 @@ export default function App() {
       label: `Average slippage (avg tx size ${Math.round(
         avgTxSize
       ).toLocaleString()} DAI)`,
+      description: resultParameterDescriptions.slippage.text,
       value: +(100 * avgSlippage).toFixed(3) + "%"
     }
   ];
@@ -353,15 +374,21 @@ export default function App() {
                       </div>
                       <table>
                         <tbody>
-                          {parameterDescriptions.map(({ name, text }) => (
+                          {[
+                            parameterDescriptions.theta,
+                            parameterDescriptions.p0,
+                            parameterDescriptions.p1,
+                            parameterDescriptions.wFee,
+                            parameterDescriptions.d0
+                          ].map(({ name, text }) => (
                             <tr key={name}>
                               <td>
-                                <Typography className={classes.descriptionName}>
-                                  {name}
-                                </Typography>
+                                <Typography>{name}</Typography>
                               </td>
                               <td>
-                                <Typography>{text}</Typography>
+                                <Typography className={classes.descriptionBody}>
+                                  {text}
+                                </Typography>
                               </td>
                             </tr>
                           ))}
@@ -398,13 +425,16 @@ export default function App() {
                 <Typography variant="h6">Preview</Typography>
                 <HelpText
                   text={
-                    <Typography>
-                      Visualization of the token bonding curve analytic function
-                      on a specific range of reserve [0, 4 * R0]. This result is
-                      deterministic given the current set of parameters and will
-                      never change regardes of the campaign performance, it only
-                      shows how the price will react to reserve changes.
-                    </Typography>
+                    <div className={classes.descriptionPadding}>
+                      <Typography className={classes.descriptionBody}>
+                        Visualization of the token bonding curve analytic
+                        function on a specific range of reserve [0, 4 * R0].
+                        This result is deterministic given the current set of
+                        parameters and will never change regardes of the
+                        campaign performance, it only shows how the price will
+                        react to reserve changes.
+                      </Typography>
+                    </div>
                   }
                 />
               </Box>
@@ -449,14 +479,40 @@ export default function App() {
                     <Typography variant="h6">Simulation</Typography>
                     <HelpText
                       text={
-                        <Typography>
-                          This chart shows a 52 week simulation of discrete
-                          transactions interacting with the token bonding curve.
-                          Each transaction adds or substract reserve to the
-                          system, modifying the price over time. The frequency,
-                          size and direction of each transaction is computed
-                          from a set of bounded random functions.
-                        </Typography>
+                        <div className={classes.descriptionContainer}>
+                          <div className={classes.descriptionPadding}>
+                            <Typography className={classes.descriptionBody}>
+                              This chart shows a 52 week simulation of discrete
+                              transactions interacting with the token bonding
+                              curve. Each transaction adds or substract reserve
+                              to the system, modifying the price over time. The
+                              frequency, size and direction of each transaction
+                              is computed from a set of bounded random
+                              functions.
+                            </Typography>
+                          </div>
+
+                          <table>
+                            <tbody>
+                              {Object.values(
+                                simulationParameterDescriptions
+                              ).map(({ name, text }) => (
+                                <tr key={name}>
+                                  <td>
+                                    <Typography>{name}</Typography>
+                                  </td>
+                                  <td>
+                                    <Typography
+                                      className={classes.descriptionBody}
+                                    >
+                                      {text}
+                                    </Typography>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       }
                     />
                   </Box>
@@ -465,6 +521,7 @@ export default function App() {
                     <PriceSimulationChart
                       priceTimeseries={priceTimeseries}
                       withdrawFeeTimeseries={withdrawFeeTimeseries}
+                      floorpriceTimeseries={floorpriceTimeseries}
                       p0={p0}
                       p1={p1}
                     />
@@ -486,18 +543,18 @@ export default function App() {
                           </div>
                           <table>
                             <tbody>
-                              {resultParameterDescriptions.map(
+                              {Object.values(resultParameterDescriptions).map(
                                 ({ name, text }) => (
                                   <tr key={name}>
                                     <td>
-                                      <Typography
-                                        className={classes.descriptionName}
-                                      >
-                                        {name}
-                                      </Typography>
+                                      <Typography>{name}</Typography>
                                     </td>
                                     <td>
-                                      <Typography>{text}</Typography>
+                                      <Typography
+                                        className={classes.descriptionBody}
+                                      >
+                                        {text}
+                                      </Typography>
                                     </td>
                                   </tr>
                                 )
