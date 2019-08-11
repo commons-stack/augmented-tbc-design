@@ -8,7 +8,6 @@ const useStyles = makeStyles(theme => ({
   container: {
     color: theme.palette.text.secondary,
     display: "flex",
-    marginLeft: "6px",
     fontSize: "0.9rem",
     cursor: "pointer",
     transition: "color ease 150ms",
@@ -61,7 +60,7 @@ export default function TextWithPopover({
   return (
     <div className={classes.container}>
       <div aria-describedby={id} onClick={handleClick}>
-        <Typography gutterBottom>{content}</Typography>
+        <Typography>{content}</Typography>
       </div>
       <Popover
         PaperProps={{

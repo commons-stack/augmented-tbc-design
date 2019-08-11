@@ -2,10 +2,11 @@ import React from "react";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
+import Typography from "@material-ui/core/Typography";
 import NumberFormat from "react-number-format";
 import { InputFieldInterface } from "./types";
 import PrettoSlider from "./PrettoSlider";
-import TextWithPopover from "./TextWithPopover";
+import HelpText from "./HelpText";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -17,7 +18,7 @@ const useStyles = makeStyles((theme: Theme) =>
       marginRight: theme.spacing(1)
     },
     leftContainer: {
-      color: theme.palette.text.secondary
+      // color: theme.palette.text.secondary
     },
     centerContainer: {
       // color: blackColor
@@ -64,7 +65,7 @@ function NumberFormatCustom(props: any) {
   );
 }
 
-export default function InputParams({
+export default function InputParamBig({
   inputFields,
   onChangeCommited
 }: {
@@ -99,11 +100,25 @@ export default function InputParams({
 
           return (
             <Grid key={label} container spacing={0} className={classes.listBox}>
-              <Grid item xs={6} className={classes.leftContainer}>
-                <TextWithPopover content={label} popoverText={description} />
+              <Grid
+                item
+                xs={6}
+                sm={6}
+                md={3}
+                lg={2}
+                className={classes.leftContainer}
+              >
+                <Typography variant="h6">{label}</Typography>
+                <HelpText title={label} body={description} />
               </Grid>
 
-              <Grid item xs={2} className={classes.centerContainer}>
+              <Grid
+                item
+                xs={2}
+                sm={2}
+                md={1}
+                className={classes.centerContainer}
+              >
                 <TextField
                   onChange={e => {
                     sanitizeInput(
@@ -123,7 +138,7 @@ export default function InputParams({
                 />
               </Grid>
 
-              <Grid item xs={4}>
+              <Grid item xs={4} sm={4} md={8} lg={9}>
                 <PrettoSlider
                   className={classes.slider}
                   valueLabelDisplay="auto"

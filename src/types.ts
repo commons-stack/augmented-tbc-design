@@ -9,7 +9,6 @@ export interface InputFieldInterface {
   unit?: string;
   prefix?: string;
   suffix?: string;
-  secondaryColor?: boolean;
   toText?(value: number): string;
   toNum?(value: string): number;
   format(value: number): string;
@@ -21,4 +20,5 @@ export interface CurveParamsInterface {
   p0: number;
   p1: number;
   wFee: number;
+  vHalflife: number;
 }

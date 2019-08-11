@@ -115,7 +115,8 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     button: {
       // background: "linear-gradient(290deg, #2ad179, #4ab47c)", // Green gradient
-      background: "linear-gradient(290deg, #1880e0, #3873d8)", // blue gradient
+      background: "linear-gradient(290deg, #1aa059, #3d9567)", // Darker Green gradient
+      // background: "linear-gradient(290deg, #1880e0, #3873d8)", // blue gradient
       color: "white"
     },
     // Descriptions
@@ -138,6 +139,23 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     descriptionPadding: {
       padding: theme.spacing(0.5)
+    },
+    d0Container: {
+      "& > div": {
+        padding: "0 12px 0 0 !important",
+        display: "flex",
+        alignItems: "center"
+      }
+    },
+    d0Number: {
+      padding: "0 !important",
+      display: "flex",
+      alignItems: "center"
+    },
+    d0Slidder: {
+      padding: "0 12px 0 0 !important",
+      display: "flex",
+      alignItems: "center"
     }
   })
 );
@@ -148,10 +166,11 @@ export default function App() {
     p0: 0.1, // Hatch sale price p0 (DAI / token)
     p1: 0.3, // Return factor (.)
     wFee: 0.05, // friction coefficient (.)
+    vHalflife: 52, // Vesting half life (weeks)
     d0: 3e6 // Initial raise, d0 (DAI)
   });
 
-  const { d0, theta, p0, p1, wFee } = curveParams;
+  const { d0, theta, p0, p1, wFee, vHalflife } = curveParams;
 
   /**
    * Throttle the curve update to prevent the expensive chart
@@ -233,7 +252,7 @@ export default function App() {
       const tx_spread = 10;
       // vesting(should this be exposed in the app ?)
       const cliff = 8; // weeks before vesting starts ~2 months
-      const halflife = 52; // 26 weeks, half life is ~6 months
+      // const halflife = 52; // 26 weeks, half life is ~6 months
       // percentage of the hatch tokens which vest per week(since that is our timescale in the sim)
 
       // numSteps = 52 take 8ms to run
@@ -275,7 +294,7 @@ export default function App() {
         //  txsWithdraw.reduce((t, c) => t + c, 0);
 
         // Vest
-        const delta_H = vest_tokens({ week: t, H, halflife, cliff });
+        const delta_H = vest_tokens({ week: t, H, halflife: vHalflife, cliff });
         const H_next = H - delta_H;
 
         // find floor price
@@ -346,14 +365,14 @@ export default function App() {
       description: resultParameterDescriptions.exitTributes.text,
       value:
         (+getLast(withdrawFeeTimeseries).toPrecision(3)).toLocaleString() +
-        ` DAI (${withdrawCount} txs)`
+        " DAI",
+      valueFooter: `From ${withdrawCount} exit txs`
     },
     {
       label: resultParameterDescriptions.slippage.name,
       description: resultParameterDescriptions.slippage.text,
-      value:
-        +(100 * avgSlippage).toFixed(3) +
-        ` % (avg tx size ${Math.round(avgTxSize).toLocaleString()} DAI)`
+      value: +(100 * avgSlippage).toFixed(3) + " %",
+      valueFooter: `Avg tx size ${Math.round(avgTxSize).toLocaleString()} DAI`
     }
   ];
 
@@ -374,53 +393,19 @@ export default function App() {
               <Box className={classes.boxHeader}>
                 <Typography variant="h6">Curve Design</Typography>
                 <HelpText
-                  text={
-                    <div className={classes.descriptionContainer}>
-                      <div>
-                        <Typography className={classes.descriptionTitle}>
-                          Parameters description:
-                        </Typography>
-                      </div>
-                      <table>
-                        <tbody>
-                          {[
-                            parameterDescriptions.theta,
-                            parameterDescriptions.p0,
-                            parameterDescriptions.p1,
-                            parameterDescriptions.wFee,
-                            parameterDescriptions.d0
-                          ].map(({ name, text }) => (
-                            <tr key={name}>
-                              <td>
-                                <Typography>{name}</Typography>
-                              </td>
-                              <td>
-                                <Typography className={classes.descriptionBody}>
-                                  {text}
-                                </Typography>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  }
+                  title={"Parameters description"}
+                  table={[
+                    parameterDescriptions.theta,
+                    parameterDescriptions.p0,
+                    parameterDescriptions.p1,
+                    parameterDescriptions.wFee,
+                    parameterDescriptions.vHalflife
+                  ]}
                 />
               </Box>
 
               <Box className={`${classes.box} ${classes.boxBorderBottom}`}>
                 <CurveDesignInputParams
-                  curveParams={curveParams}
-                  setCurveParams={setCurveParamsThrottle}
-                />
-              </Box>
-
-              <Box className={`${classes.boxHeader} ${classes.initialRaise}`}>
-                <Typography variant="h6">Run parameters</Typography>
-              </Box>
-
-              <Box className={classes.box}>
-                <SimulationInputParams
                   curveParams={curveParams}
                   setCurveParams={setCurveParamsThrottle}
                 />
@@ -432,15 +417,7 @@ export default function App() {
             <Paper className={classes.paper}>
               <Box className={classes.boxHeader}>
                 <Typography variant="h6">Preview</Typography>
-                <HelpText
-                  text={
-                    <div className={classes.descriptionPadding}>
-                      <Typography className={classes.descriptionBody}>
-                        {supplyVsDemandChartDescription}
-                      </Typography>
-                    </div>
-                  }
-                />
+                <HelpText body={supplyVsDemandChartDescription} />
               </Box>
 
               <Box className={classes.boxChart}>
@@ -451,8 +428,15 @@ export default function App() {
         </Grid>
 
         <Grid container spacing={3}>
-          <Grid item xs={12} md={12}>
+          <Grid item xs={12}>
             <Paper>
+              <Box className={`${classes.box} ${classes.boxBorderBottom}`}>
+                <SimulationInputParams
+                  curveParams={curveParams}
+                  setCurveParams={setCurveParamsThrottle}
+                />
+              </Box>
+
               <Box className={classes.boxHeader}>
                 <Grid
                   container
@@ -482,36 +466,8 @@ export default function App() {
                   <Box className={classes.boxHeader}>
                     <Typography variant="h6">Simulation</Typography>
                     <HelpText
-                      text={
-                        <div className={classes.descriptionContainer}>
-                          <div className={classes.descriptionPadding}>
-                            <Typography className={classes.descriptionBody}>
-                              {simulationChartDescription}
-                            </Typography>
-                          </div>
-
-                          <table>
-                            <tbody>
-                              {Object.values(
-                                simulationParameterDescriptions
-                              ).map(({ name, text }) => (
-                                <tr key={name}>
-                                  <td>
-                                    <Typography>{name}</Typography>
-                                  </td>
-                                  <td>
-                                    <Typography
-                                      className={classes.descriptionBody}
-                                    >
-                                      {text}
-                                    </Typography>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      }
+                      body={simulationChartDescription}
+                      table={Object.values(simulationParameterDescriptions)}
                     />
                   </Box>
 
@@ -533,35 +489,8 @@ export default function App() {
                   <Box className={classes.boxHeader}>
                     <Typography variant="h6">Results</Typography>
                     <HelpText
-                      text={
-                        <div className={classes.descriptionContainer}>
-                          <div>
-                            <Typography className={classes.descriptionTitle}>
-                              Result parameters description:
-                            </Typography>
-                          </div>
-                          <table>
-                            <tbody>
-                              {Object.values(resultParameterDescriptions).map(
-                                ({ name, text }) => (
-                                  <tr key={name}>
-                                    <td>
-                                      <Typography>{name}</Typography>
-                                    </td>
-                                    <td>
-                                      <Typography
-                                        className={classes.descriptionBody}
-                                      >
-                                        {text}
-                                      </Typography>
-                                    </td>
-                                  </tr>
-                                )
-                              )}
-                            </tbody>
-                          </table>
-                        </div>
-                      }
+                      title={"Result parameters description"}
+                      table={Object.values(resultParameterDescriptions)}
                     />
                   </Box>
 

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { InputFieldInterface, CurveParamsInterface } from "./types";
-import InputParams from "./InputParams";
+import InputParamBig from "./InputParamBig";
 import { parameterDescriptions } from "./parametersDescriptions";
 
-export default function CurveDesignInputParams({
+export default function SimulationInputParams({
   curveParams,
   setCurveParams
 }: {
@@ -25,7 +25,7 @@ export default function CurveDesignInputParams({
 
   const inputFields: InputFieldInterface[] = [
     {
-      label: `${parameterDescriptions.d0.name} (DAI)`,
+      label: `${parameterDescriptions.d0.name}`,
       description: parameterDescriptions.d0.text,
       value: d0,
       setter: setD0,
@@ -35,13 +35,12 @@ export default function CurveDesignInputParams({
       suffix: "M",
       format: (n: number) => `$${+(n * 1e-6).toFixed(1)}M`,
       toText: (n: number) => String(+(n * 1e-6).toFixed(1)),
-      toNum: (n: string) => Math.floor(parseFloat(n) * 1e6),
-      secondaryColor: true
+      toNum: (n: string) => Math.floor(parseFloat(n) * 1e6)
     }
   ];
 
   return (
-    <InputParams
+    <InputParamBig
       inputFields={inputFields}
       onChangeCommited={setParentCurveParams}
     />

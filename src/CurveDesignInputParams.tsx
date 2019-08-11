@@ -14,12 +14,14 @@ export default function CurveDesignInputParams({
   const [p0, setP0] = useState(0.1); // Hatch sale Price p0 (DAI / token)
   const [p1, setP1] = useState(0.3); // Return factor (.)
   const [wFee, setWFee] = useState(0.05); // friction coefficient (.)
+  const [vHalflife, setVHalflife] = useState(52); // friction coefficient (.)
 
   useEffect(() => {
     setTheta(curveParams.theta);
     setP0(curveParams.p0);
     setP1(curveParams.p1);
     setWFee(curveParams.wFee);
+    setVHalflife(curveParams.vHalflife);
   }, [curveParams]);
 
   function _setP0(newP0: number) {
@@ -34,7 +36,8 @@ export default function CurveDesignInputParams({
       theta,
       p0,
       p1,
-      wFee
+      wFee,
+      vHalflife
     }));
   }
 
@@ -90,6 +93,19 @@ export default function CurveDesignInputParams({
       format: (n: number) => `${+(100 * n).toFixed(1)}%`,
       toText: (n: number) => String(+(n * 1e2).toFixed(1)),
       toNum: (n: string) => parseFloat(n) * 1e-2
+    },
+    {
+      label: `${parameterDescriptions.vHalflife.name} (weeks)`,
+      description: parameterDescriptions.vHalflife.text,
+      value: vHalflife,
+      setter: setVHalflife,
+      min: 52 / 2,
+      max: 52 * 2,
+      step: 1,
+      suffix: "",
+      format: (n: number) => String(Math.round(n)),
+      toText: (n: number) => String(Math.round(n)),
+      toNum: (n: string) => Math.round(parseInt(n))
     }
   ];
 

@@ -38,6 +38,10 @@ const useStyles = makeStyles((theme: Theme) =>
       "& > div:not(:last-child)": {
         paddingRight: "12px"
       }
+    },
+    valueFooter: {
+      color: theme.palette.text.secondary,
+      fontSize: "80%"
     }
   })
 );
@@ -50,6 +54,7 @@ export default function ResultParams({
     label: string;
     description: string;
     value: number | string;
+    valueFooter?: string;
   }[];
   simulationDuration: number;
 }) {
@@ -58,7 +63,7 @@ export default function ResultParams({
    * Keep the animation active only during the initial animation time,
    * but afterwards, deactivate to prevent the re-size ugly effect
    */
-  const [isAnimationActive, setIsAnimationActive] = useState(true);
+  const [isAnimationActive, setIsAnimationActive] = useState(false);
   useEffect(() => {
     const timeout = setTimeout(() => {
       setIsAnimationActive(false);
@@ -72,7 +77,7 @@ export default function ResultParams({
 
   return (
     <div className={classes.listBoxContainer}>
-      {resultFields.map(({ label, description, value }) => (
+      {resultFields.map(({ label, description, value, valueFooter }) => (
         <Grid key={label} container spacing={0} className={classes.listBox}>
           <Grid item xs={8} className={classes.leftContainer}>
             <TextWithPopover content={label} popoverText={description} />
@@ -82,7 +87,14 @@ export default function ResultParams({
             {isAnimationActive ? (
               <DotsLoader />
             ) : (
-              <Typography gutterBottom>{value}</Typography>
+              <div>
+                <Typography>{value}</Typography>
+                {valueFooter && (
+                  <Typography className={classes.valueFooter}>
+                    {valueFooter}
+                  </Typography>
+                )}
+              </div>
             )}
           </Grid>
         </Grid>

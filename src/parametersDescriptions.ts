@@ -22,6 +22,11 @@ export const parameterDescriptions: DescriptionObject = {
     text:
       "The percentage that goes to the funding pool when token holders 'sell' by burning their token at the price determined by the bonding curve"
   },
+  vHalflife: {
+    name: "Vesting half life",
+    text:
+      "Tokens that are purchased during the Hatch are locked for 9 weeks and then released slowly such that 50% of the tokens will be able to be sold after this many weeks and 87.5% of the tokens after 3x this many weeks"
+  },
   d0: {
     name: "Initial raise",
     text: "Amount of funds contributed during the hatch period"
