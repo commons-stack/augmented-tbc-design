@@ -17,7 +17,7 @@ import { useTheme } from "@material-ui/styles";
 
 const isAnimationActive = false;
 const keyHorizontal = "x";
-const keyVertical = "Supply (tokens) / Reserve (DAI)";
+const keyVertical = "Supply (tokens) / Collateral (DAI)";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -117,7 +117,7 @@ function SupplyVsDemandChart({
       const price = getPriceR({ R: reserve, V0, k });
       const toolTipData: string[][] = [
         ["Supply", formatter(supply) + unit, "tokens"],
-        ["Reserve", formatter(reserve) + unit, "DAI"],
+        ["Collateral", formatter(reserve) + unit, "DAI"],
         ["Price", price.toFixed(2), "DAI/token"]
       ];
       return (
