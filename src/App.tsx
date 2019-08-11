@@ -330,7 +330,7 @@ export default function App() {
       setWithdrawFeeTimeseries(wFee_t);
       setFloorpriceTimeseries(floorprice_t);
       setAvgSlippage(getAvg(slippage_t));
-      setAvgTxSize(getAvg(avgTxSize_t));
+      setAvgTxSize(getAvg(avgTxSize_t.filter(n => !isNaN(n))));
       setTotalReserve(getLast(R_t));
 
       setSimulationRunning(false);
