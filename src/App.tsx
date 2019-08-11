@@ -168,7 +168,7 @@ export default function App() {
     p0: 0.1, // Hatch sale price p0 (DAI / token)
     p1: 0.3, // Return factor (.)
     wFee: 0.05, // friction coefficient (.)
-    vHalflife: 52, // Vesting half life (weeks)
+    vHalflife: 17, // Vesting half life (weeks)
     d0: 3e6 // Initial raise, d0 (DAI)
   });
 
