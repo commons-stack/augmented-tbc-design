@@ -49,3 +49,24 @@ export function getAvg(a: number[]) {
 export function pause(ms: number) {
   return new Promise(r => setTimeout(r, ms));
 }
+
+/**
+ * Parse the units of big numbers
+ */
+export function getUnits(
+  biggestNum: number
+): { scaling: number; unit: string } {
+  const [scaling, unit] =
+    // Billion
+    biggestNum > 0.5e9
+      ? [1e9, "B"]
+      : // Million
+      biggestNum > 0.5e6
+      ? [1e6, "M"]
+      : // 1 thousand
+      biggestNum > 0.5e3
+      ? [1e3, "K"]
+      : // No scale
+        [1, ""];
+  return { scaling, unit };
+}

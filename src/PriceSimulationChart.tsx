@@ -12,7 +12,7 @@ import {
 } from "recharts";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import { useTheme } from "@material-ui/styles";
-import { linspace } from "./utils";
+import { linspace, getUnits } from "./utils";
 
 const keyHorizontal = "x";
 const keyVerticalLeft = "Price (DAI/token)";
@@ -84,22 +84,34 @@ function PriceSimulationChart({
     };
   });
 
-  // Chart components
+  // Compute chart related math
+
+  const totalFundsMin = totalFundsRaisedTimeseries[0];
+  const totalFundsMax = totalFundsRaisedTimeseries.slice(-1)[0];
+  const totalFundsRange = totalFundsMax - totalFundsMin;
+
+  const daiFormatter = (n: number) => (+n.toFixed(2)).toLocaleString();
+  const { scaling, unit } = getUnits(totalFundsMax);
+  const fundsFormatter = (n: number) => (+n.toPrecision(3)).toLocaleString();
+  const fundsFormatterShort = (n: number) =>
+    (+(n / scaling).toPrecision(3)).toLocaleString();
+
+  // Load styles
 
   const theme: any = useTheme();
   const classes = useStyles();
+
+  // Chart components
 
   function renderColorfulLegendText(value: string) {
     return <span style={{ color: theme.palette.text.secondary }}>{value}</span>;
   }
 
-  const formatter = (n: number) => (+n.toPrecision(3)).toLocaleString();
-
   function ReferenceLabel(props: any) {
     const { textAnchor, viewBox, text, fill } = props;
     return (
       <text
-        x={viewBox.x + 8}
+        x={viewBox.x + 4}
         y={viewBox.y + 17}
         fill={referenceLineColor}
         textAnchor={textAnchor}
@@ -113,12 +125,12 @@ function PriceSimulationChart({
     if (active) {
       const price = payload[0].value;
       const floor = payload[1].value;
-      const exit = payload[2].value;
+      const funds = payload[2].value;
       const weekNum = label;
       const toolTipData: string[][] = [
-        ["Price", price.toFixed(2), "DAI/tk"],
-        ["Floor P.", floor.toFixed(2), "DAI/tk"],
-        ["Funds R.", formatter(exit), "DAI"],
+        ["Price", daiFormatter(price), "DAI/tk"],
+        ["Floor P.", daiFormatter(floor), "DAI/tk"],
+        ["Funds R.", fundsFormatterShort(funds) + unit, "DAI"],
         ["Week", weekNum, ""]
       ];
 
@@ -139,10 +151,6 @@ function PriceSimulationChart({
       );
     } else return null;
   }
-
-  const totalFundsMin = totalFundsRaisedTimeseries[0];
-  const totalFundsMax = totalFundsRaisedTimeseries.slice(-1)[0];
-  const totalFundsRange = totalFundsMax - totalFundsMin;
 
   return (
     <ResponsiveContainer debounce={1}>
@@ -179,7 +187,7 @@ function PriceSimulationChart({
         <YAxis
           yAxisId="left"
           domain={[0, Math.max(...priceTimeseries, p1 * 1.25)]}
-          tickFormatter={formatter}
+          tickFormatter={daiFormatter}
           tick={{ fill: yLeftColor }}
           stroke={yLeftColor}
         />
@@ -192,7 +200,7 @@ function PriceSimulationChart({
             +(totalFundsMax + totalFundsRange).toPrecision(2)
           ]}
           orientation="right"
-          tickFormatter={formatter}
+          tickFormatter={fundsFormatter}
           tick={{ fill: yRightColor }}
           stroke={yRightColor}
         />

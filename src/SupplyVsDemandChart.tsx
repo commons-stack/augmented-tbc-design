@@ -11,7 +11,7 @@ import {
   Tooltip
 } from "recharts";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
-import { getLinspaceTicks } from "./utils";
+import { getLinspaceTicks, getUnits } from "./utils";
 import { getInitialParams, getPriceR } from "./math";
 import { useTheme } from "@material-ui/styles";
 
@@ -73,18 +73,7 @@ function SupplyVsDemandChart({
    * Prettify the result converting 1000000 to 1M
    */
   const biggest = Math.max(to, f(to));
-  const [scaling, unit] =
-    // Billion
-    biggest > 0.5e9
-      ? [1e9, "B"]
-      : // Million
-      biggest > 0.5e6
-      ? [1e6, "M"]
-      : // 1 thousand
-      biggest > 0.5e3
-      ? [1e3, "K"]
-      : // No scale
-        [1, ""];
+  const { scaling, unit } = getUnits(biggest);
 
   const data = [];
   for (let i = 0; i < steps; i++) {
@@ -135,11 +124,11 @@ function SupplyVsDemandChart({
         <div className={classes.tooltip}>
           <table>
             <tbody>
-              {toolTipData.map(([name, value, unit]) => (
+              {toolTipData.map(([name, value, _unit]) => (
                 <tr key={name}>
                   <td>{name}</td>
                   <td>{value}</td>
-                  <td>{unit}</td>
+                  <td>{_unit}</td>
                 </tr>
               ))}
             </tbody>
