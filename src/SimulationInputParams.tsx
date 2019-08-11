@@ -25,7 +25,7 @@ export default function CurveDesignInputParams({
 
   const inputFields: InputFieldInterface[] = [
     {
-      label: "Initial raise (DAI)",
+      label: `${parameterDescriptions.d0.name} (DAI)`,
       description: parameterDescriptions.d0.text,
       value: d0,
       setter: setD0,

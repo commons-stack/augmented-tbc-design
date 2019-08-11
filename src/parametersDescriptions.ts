@@ -4,30 +4,35 @@ export interface DescriptionObject {
 
 export const parameterDescriptions: DescriptionObject = {
   theta: {
-    name: "Allocation to funding pool",
+    name: "Hatch % to funding pool",
     text:
-      "The percentage of the funds raised in the Hatch sale that go directly into the project funding pool to compensate future work done in the project"
+      "The percentage of the funds raised in the Hatch going directly to funding pool to be used to support the Commons, the rest goes to the collateral pool"
   },
   p0: {
     name: "Hatch price",
-    text:
-      "The price paid per 'ABC token' by community members involved in hatching the project"
+    text: "The price paid per token by when hatching the project"
   },
   p1: {
-    name: "Post-hatch price",
+    name: "Post-Hatch price",
     text:
-      "The price of the 'ABC token' when the curve enters the open phase and is live for public participation"
+      "The price per token after the Hatch ends, the curve is set, and anyone can interact with the bonding curve"
   },
   wFee: {
     name: "Exit tribute",
     text:
-      "The percentage of funds that are diverted to the project funding pool from community members who exit funds from the project by burning 'ABC tokens' in exchange for collateral"
+      "The percentage that goes to the funding pool when token holders 'sell' by burning their token at the price determined by the bonding curve"
   },
   d0: {
     name: "Initial raise",
-    text: "Total funds raised in the hatch period of the ABC launch"
+    text: "Amount of funds contributed during the hatch period"
   }
 };
+
+export const supplyVsDemandChartDescription =
+  "Visualization of the bonding curve up to 4x the initial size of the Collateral Pool Post-Hatch. This result is deterministic given the curve parameters and the initial raise. It will never change regardless of the campaign's performance, it simply shows how the price will react to changes in the Collateral Pool.";
+
+export const simulationChartDescription =
+  "This chart shows a 52 week simulation of discrete transactions interacting with the Augmented Bonding Curve. Each transaction adds to or subtracts reserve from the system, modifying the price over time. The frequency, size and direction of each transaction is computed from a set of bounded random functions. This is a NOT a cadCAD simulation, but it showcases the intention behind cadCAD.";
 
 export const simulationParameterDescriptions: DescriptionObject = {
   price: {
@@ -39,31 +44,29 @@ export const simulationParameterDescriptions: DescriptionObject = {
     text:
       "Lower bound of the price guaranteed by the vesting of hatch tokens. It decreases over time as more hatch tokens are allowed to be traded"
   },
-  exitTributes: {
-    name: "Total exit tributes",
-    text:
-      "Cumulative sum of exit tributes collected from only exit /sell transactions"
+  totalRaised: {
+    name: "Total funds raised",
+    text: "Cumulative sum of the funds sent to the Funding Pool"
   }
 };
 
 export const resultParameterDescriptions: DescriptionObject = {
   totalReserve: {
-    name: "Total reserve",
-    text:
-      "Total DAI in the smart contract reserve at the end of the simulated period"
+    name: "Collateral pool balance",
+    text: "Total DAI in the collateral pool at the end of the simulated period"
   },
   initialHatchFunds: {
-    name: "Funds generated from initial hatch",
-    text:
-      "Fraction of the funds (theta) raised during the hatch that go directly to the cause (analytic result)"
+    name: "Funds generated from initial Hatch",
+    text: "Funds raised during the Hatch that go directly to the cause"
   },
   exitTributes: {
     name: "Funds generated from exit tributes",
-    text: simulationParameterDescriptions.exitTributes.text
+    text:
+      "Cumulative sum of exit tributes collected from only exit / sell / burn transactions"
   },
   slippage: {
     name: "Average slippage",
     text:
-      "Average of the slippage of each transaction occured during the simulation period"
+      "Average of change in price a user experiences from the current price to the price received for exiting/selling/burning"
   }
 };

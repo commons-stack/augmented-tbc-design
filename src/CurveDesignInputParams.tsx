@@ -42,7 +42,7 @@ export default function CurveDesignInputParams({
 
   const inputFields: InputFieldInterface[] = [
     {
-      label: "Allocation to funding pool",
+      label: parameterDescriptions.theta.name,
       description: parameterDescriptions.theta.text,
       value: theta,
       setter: setTheta,
@@ -55,7 +55,7 @@ export default function CurveDesignInputParams({
       toNum: (n: string) => parseFloat(n) * 1e-2
     },
     {
-      label: "Hatch price (DAI/token)",
+      label: `${parameterDescriptions.p0.name} (DAI/token)`,
       description: parameterDescriptions.p0.text,
       value: p0,
       setter: _setP0,
@@ -67,7 +67,7 @@ export default function CurveDesignInputParams({
       format: (n: number) => `$${n}`
     },
     {
-      label: "Post-hatch price (DAI/token)",
+      label: `${parameterDescriptions.p1.name} (DAI/token)`,
       description: parameterDescriptions.p1.text,
       value: p1,
       setter: setP1,
@@ -79,7 +79,7 @@ export default function CurveDesignInputParams({
       format: (n: number) => `$${n}`
     },
     {
-      label: "Exit tribute",
+      label: parameterDescriptions.wFee.name,
       description: parameterDescriptions.wFee.text,
       value: wFee,
       setter: setWFee,

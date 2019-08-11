@@ -16,8 +16,8 @@ import { linspace } from "./utils";
 
 const keyHorizontal = "x";
 const keyVerticalLeft = "Price (DAI/token)";
-const keyVerticalRight = "Total exit tributes (DAI)";
 const keyVerticalLeft2 = "Floor price (DAI/token)";
+const keyVerticalRight = "Total funds raised (DAI)";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -32,13 +32,13 @@ const useStyles = makeStyles((theme: Theme) =>
 
 function PriceSimulationChart({
   priceTimeseries,
-  withdrawFeeTimeseries,
+  totalFundsRaisedTimeseries,
   floorpriceTimeseries,
   p0,
   p1
 }: {
   priceTimeseries: number[];
-  withdrawFeeTimeseries: number[];
+  totalFundsRaisedTimeseries: number[];
   floorpriceTimeseries: number[];
   p0: number;
   p1: number;
@@ -55,7 +55,7 @@ function PriceSimulationChart({
       [keyHorizontal]: t,
       [keyVerticalLeft]: priceTimeseries[t] || 0,
       [keyVerticalLeft2]: floorpriceTimeseries[t] || 0,
-      [keyVerticalRight]: withdrawFeeTimeseries[t] || 0
+      [keyVerticalRight]: totalFundsRaisedTimeseries[t] || 0
     });
   }
 
@@ -92,8 +92,8 @@ function PriceSimulationChart({
       const weekNum = label;
       const toolTipData: string[][] = [
         ["Price", price.toFixed(2), "DAI/tk"],
-        ["Floor", floor.toFixed(2), "DAI/tk"],
-        ["Exit t.", formatter(exit), "DAI"],
+        ["Floor P.", floor.toFixed(2), "DAI/tk"],
+        ["Funds R.", formatter(exit), "DAI"],
         ["Week", weekNum, ""]
       ];
 
@@ -114,6 +114,10 @@ function PriceSimulationChart({
       );
     } else return null;
   }
+
+  const totalFundsMin = totalFundsRaisedTimeseries[0];
+  const totalFundsMax = totalFundsRaisedTimeseries.slice(-1)[0];
+  const totalFundsRange = totalFundsMax - totalFundsMin;
 
   return (
     <ResponsiveContainer debounce={1}>
@@ -154,7 +158,10 @@ function PriceSimulationChart({
         {/* Capital collected from withdraw fees - AXIS */}
         <YAxis
           yAxisId="right"
-          domain={[0, +(2 * withdrawFeeTimeseries.slice(-1)[0]).toPrecision(1)]}
+          domain={[
+            totalFundsMin.toPrecision(2),
+            +(totalFundsMax + totalFundsRange).toPrecision(2)
+          ]}
           orientation="right"
           tick={{ fill: theme.palette.text.secondary }}
           tickFormatter={formatter}

@@ -19,7 +19,9 @@ import HelpText from "./HelpText";
 import {
   parameterDescriptions,
   simulationParameterDescriptions,
-  resultParameterDescriptions
+  resultParameterDescriptions,
+  supplyVsDemandChartDescription,
+  simulationChartDescription
 } from "./parametersDescriptions";
 // Utils
 import { getLast, getAvg, pause } from "./utils";
@@ -321,28 +323,36 @@ export default function App() {
     };
   }, [simulationActive]);
 
+  // End results computed for chart visualization
+  const initialHatchFunds = d0 * theta;
+  const totalFundsRaisedTimeseries = withdrawFeeTimeseries.map(
+    x => x + initialHatchFunds
+  );
+
   const resultFields = [
     {
-      label: `Total reserve`,
+      label: resultParameterDescriptions.totalReserve.name,
       description: resultParameterDescriptions.totalReserve.text,
       value: (+totalReserve.toPrecision(3)).toLocaleString() + " DAI"
     },
     {
-      label: `Funds generated from initial hatch`,
+      label: resultParameterDescriptions.initialHatchFunds.name,
       description: resultParameterDescriptions.initialHatchFunds.text,
       value: Math.round(d0 * theta).toLocaleString() + " DAI"
     },
     {
-      label: `Funds generated from exit tributes (${withdrawCount} txs)`,
+      label: `${
+        resultParameterDescriptions.exitTributes.name
+      } (${withdrawCount} txs)`,
       description: resultParameterDescriptions.exitTributes.text,
       value:
         (+getLast(withdrawFeeTimeseries).toPrecision(3)).toLocaleString() +
         " DAI"
     },
     {
-      label: `Average slippage (avg tx size ${Math.round(
-        avgTxSize
-      ).toLocaleString()} DAI)`,
+      label: `${
+        resultParameterDescriptions.slippage.name
+      } (avg tx size ${Math.round(avgTxSize).toLocaleString()} DAI)`,
       description: resultParameterDescriptions.slippage.text,
       value: +(100 * avgSlippage).toFixed(3) + "%"
     }
@@ -427,12 +437,7 @@ export default function App() {
                   text={
                     <div className={classes.descriptionPadding}>
                       <Typography className={classes.descriptionBody}>
-                        Visualization of the token bonding curve analytic
-                        function on a specific range of reserve [0, 4 * R0].
-                        This result is deterministic given the current set of
-                        parameters and will never change regardes of the
-                        campaign performance, it only shows how the price will
-                        react to reserve changes.
+                        {supplyVsDemandChartDescription}
                       </Typography>
                     </div>
                   }
@@ -482,13 +487,7 @@ export default function App() {
                         <div className={classes.descriptionContainer}>
                           <div className={classes.descriptionPadding}>
                             <Typography className={classes.descriptionBody}>
-                              This chart shows a 52 week simulation of discrete
-                              transactions interacting with the token bonding
-                              curve. Each transaction adds or substract reserve
-                              to the system, modifying the price over time. The
-                              frequency, size and direction of each transaction
-                              is computed from a set of bounded random
-                              functions.
+                              {simulationChartDescription}
                             </Typography>
                           </div>
 
@@ -520,8 +519,8 @@ export default function App() {
                   <Box className={classes.boxChart}>
                     <PriceSimulationChart
                       priceTimeseries={priceTimeseries}
-                      withdrawFeeTimeseries={withdrawFeeTimeseries}
                       floorpriceTimeseries={floorpriceTimeseries}
+                      totalFundsRaisedTimeseries={totalFundsRaisedTimeseries}
                       p0={p0}
                       p1={p1}
                     />

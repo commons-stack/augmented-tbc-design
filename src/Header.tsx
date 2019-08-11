@@ -54,7 +54,7 @@ export default function Header() {
       </div>
 
       <Typography className={classes.title} variant="h4">
-        Augmented Token Bonding Curve Design
+        Augmented Bonding Curve Design
       </Typography>
 
       <Typography className={classes.subtitle}>
