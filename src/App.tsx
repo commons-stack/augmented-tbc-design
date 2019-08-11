@@ -260,7 +260,7 @@ export default function App() {
       // numSteps = 52 take 8ms to run
       setSimulationRunning(true);
       for (let t = 0; t < numSteps; t++) {
-        const txsWeek = rv_U(5, 2 * t + 5);
+        const txsWeek = rv_U(100, 40 * t + 100);
 
         const R = getLast(R_t);
         const S = getLast(S_t);
