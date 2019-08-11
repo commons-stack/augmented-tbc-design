@@ -40,6 +40,8 @@ import {
   getSum
 } from "./math";
 import { throttle } from "lodash";
+// Data
+import { u_min_t, u_max_t } from "./u_values";
 // General styles
 import "./app.css";
 
@@ -273,7 +275,9 @@ export default function App() {
           const R_ratio = getR({ S: S - H, V0, k }) / R;
           u_lower = Math.max(1 - R_ratio, u_min);
         }
-        const priceGrowth = rv_U(u_lower, u_max);
+        let priceGrowth = rv_U(u_lower, u_max);
+        // #### DEMO
+        priceGrowth = rv_U(u_min_t[t], u_max_t[t]);
 
         const deltaR = getDeltaR_priceGrowth({ R, k, priceGrowth });
         const R_next = R + deltaR;
