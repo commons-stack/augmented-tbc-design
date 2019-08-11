@@ -282,7 +282,7 @@ export default function App() {
          * the floor price. The for loop is used to prevent a possible infinite
          * loop if a `while` loop was used.
          */
-        for (let i = 0; i < 20 && price_next < floorprice_next; i++) {
+        for (let i = 0; i < 20 && price_next < floorprice_next * 1.05; i++) {
           // enforce the effects of the unvested tokens not being burnable
           let u_lower: number, u_upper: number;
           // if (H > S) {
@@ -297,7 +297,10 @@ export default function App() {
           u_lower = u_min_t[t];
           u_upper = u_max_t[t];
 
-          if (i > 15) u_lower = 1;
+          if (i > 15) {
+            u_lower = 1.02;
+            u_upper = u_upper + 1.04;
+          }
 
           const priceGrowth = rv_U(u_lower, u_upper);
 
