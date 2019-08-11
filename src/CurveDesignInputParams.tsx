@@ -99,7 +99,7 @@ export default function CurveDesignInputParams({
       description: parameterDescriptions.vHalflife.text,
       value: vHalflife,
       setter: setVHalflife,
-      min: 52 / 2,
+      min: 1,
       max: 52 * 2,
       step: 1,
       suffix: "",

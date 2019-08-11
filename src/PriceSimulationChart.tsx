@@ -74,7 +74,9 @@ function PriceSimulationChart({
    * Keep the animation active only during the initial animation time,
    * but afterwards, deactivate to prevent the re-size ugly effect
    */
-  const [isAnimationActive, setIsAnimationActive] = useState(true);
+  const [isAnimationActive, setIsAnimationActive] = useState(
+    process.env.NODE_ENV !== "development"
+  );
   useEffect(() => {
     const timeout = setTimeout(() => {
       setIsAnimationActive(false);

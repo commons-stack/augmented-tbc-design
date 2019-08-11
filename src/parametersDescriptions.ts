@@ -25,7 +25,7 @@ export const parameterDescriptions: DescriptionObject = {
   vHalflife: {
     name: "Vesting half-life",
     text:
-      "Tokens that are purchased during the Hatch are locked for 9 weeks and then released slowly such that 50% of the tokens will be able to be sold after this many weeks and 87.5% of the tokens after 3x this many weeks"
+      "Tokens that are purchased during the Hatch are locked for 8 weeks and then released slowly such that 50% of the tokens will be able to be sold after this many weeks and 87.5% of the tokens after 3x this many weeks"
   },
   d0: {
     name: "Hatch Raise",
