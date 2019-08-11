@@ -24,9 +24,12 @@ export default function CurveDesignInputParams({
     setVHalflife(curveParams.vHalflife);
   }, [curveParams]);
 
+  const maxReturnRate = 10;
+  const minP1P0Rate = 1.5;
+
   function _setP0(newP0: number) {
     setP0(newP0);
-    if (p1 < newP0) setP1(newP0);
+    if (p1 < newP0 * minP1P0Rate) setP1(newP0 * minP1P0Rate);
     else if (p1 > newP0 * maxReturnRate) setP1(newP0 * maxReturnRate);
   }
 
@@ -40,8 +43,6 @@ export default function CurveDesignInputParams({
       vHalflife
     }));
   }
-
-  const maxReturnRate = 10;
 
   const inputFields: InputFieldInterface[] = [
     {
@@ -74,7 +75,7 @@ export default function CurveDesignInputParams({
       description: parameterDescriptions.p1.text,
       value: p1,
       setter: setP1,
-      min: p0 || 0.1,
+      min: Number((minP1P0Rate * (p0 || 0.1)).toFixed(2)),
       max: Number((maxReturnRate * p0).toFixed(2)),
       step: 0.01,
       toText: (n: number) => String(+n.toFixed(2)),
