@@ -19,6 +19,12 @@ const keyVerticalLeft = "Price (DAI/token)";
 const keyVerticalLeft2 = "Floor price (DAI/token)";
 const keyVerticalRight = "Total funds raised (DAI)";
 
+// Do to transparency and color merging issues
+// these colors are handpicked to look the closest to the theme colors
+const yLeftColor = "#53c388";
+const yRightColor = "#4090d9";
+const referenceLineColor = "#b7c1cb";
+
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     tooltip: {
@@ -66,7 +72,7 @@ function PriceSimulationChart({
    * Keep the animation active only during the initial animation time,
    * but afterwards, deactivate to prevent the re-size ugly effect
    */
-  const [isAnimationActive, setIsAnimationActive] = useState(true);
+  const [isAnimationActive, setIsAnimationActive] = useState(false);
   useEffect(() => {
     const timeout = setTimeout(() => {
       setIsAnimationActive(false);
@@ -88,12 +94,12 @@ function PriceSimulationChart({
   const formatter = (n: number) => (+n.toPrecision(3)).toLocaleString();
 
   function ReferenceLabel(props: any) {
-    const { textAnchor, viewBox, text } = props;
+    const { textAnchor, viewBox, text, fill } = props;
     return (
       <text
         x={viewBox.x + 8}
         y={viewBox.y + 17}
-        fill={theme.palette.text.secondary}
+        fill={referenceLineColor}
         textAnchor={textAnchor}
       >
         {text}
@@ -149,7 +155,11 @@ function PriceSimulationChart({
           bottom: 0
         }}
       >
-        <CartesianGrid strokeDasharray="3 3" />
+        <CartesianGrid
+          vertical={false}
+          stroke={theme.palette.text.secondary}
+          strokeOpacity={0.13}
+        />
         <XAxis
           dataKey={keyHorizontal}
           tick={{ fill: theme.palette.text.secondary }}
@@ -168,8 +178,8 @@ function PriceSimulationChart({
           yAxisId="left"
           domain={[0, Math.max(...priceTimeseries, p1 * 1.25)]}
           tickFormatter={formatter}
-          tick={{ fill: theme.palette.text.secondary }}
-          stroke={theme.palette.text.secondary}
+          tick={{ fill: yLeftColor }}
+          stroke={yLeftColor}
         />
 
         {/* Capital collected from withdraw fees - AXIS */}
@@ -180,9 +190,9 @@ function PriceSimulationChart({
             +(totalFundsMax + totalFundsRange).toPrecision(2)
           ]}
           orientation="right"
-          tick={{ fill: theme.palette.text.secondary }}
           tickFormatter={formatter}
-          stroke={theme.palette.text.secondary}
+          tick={{ fill: yRightColor }}
+          stroke={yRightColor}
         />
 
         <Tooltip content={<CustomTooltip />} />
@@ -214,14 +224,14 @@ function PriceSimulationChart({
           y={p0}
           yAxisId="left"
           stroke={theme.palette.primary.main}
-          strokeDasharray="9 0"
+          // strokeDasharray="9 0"
           label={<ReferenceLabel text="Hatch sale price" />}
         />
         <ReferenceLine
           y={p1}
           yAxisId="left"
           stroke={theme.palette.primary.main}
-          strokeDasharray="9 0"
+          // strokeDasharray="9 0"
           label={<ReferenceLabel text="After hatch price" />}
         />
 

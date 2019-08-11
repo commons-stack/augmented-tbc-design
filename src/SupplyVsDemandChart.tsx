@@ -162,7 +162,11 @@ function SupplyVsDemandChart({
           bottom: 0
         }}
       >
-        <CartesianGrid strokeDasharray="3 3" />
+        <CartesianGrid
+          vertical={false}
+          stroke={theme.palette.text.secondary}
+          strokeOpacity={0.13}
+        />
         <XAxis
           interval={24}
           dataKey={keyHorizontal}
