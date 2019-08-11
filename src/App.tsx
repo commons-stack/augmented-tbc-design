@@ -44,6 +44,7 @@ import { throttle } from "lodash";
 import "./app.css";
 
 const headerOffset = 10;
+const simulationDuration = 4000;
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -341,20 +342,18 @@ export default function App() {
       value: Math.round(d0 * theta).toLocaleString() + " DAI"
     },
     {
-      label: `${
-        resultParameterDescriptions.exitTributes.name
-      } (${withdrawCount} txs)`,
+      label: resultParameterDescriptions.exitTributes.name,
       description: resultParameterDescriptions.exitTributes.text,
       value:
         (+getLast(withdrawFeeTimeseries).toPrecision(3)).toLocaleString() +
-        " DAI"
+        ` DAI (${withdrawCount} txs)`
     },
     {
-      label: `${
-        resultParameterDescriptions.slippage.name
-      } (avg tx size ${Math.round(avgTxSize).toLocaleString()} DAI)`,
+      label: resultParameterDescriptions.slippage.name,
       description: resultParameterDescriptions.slippage.text,
-      value: +(100 * avgSlippage).toFixed(3) + "%"
+      value:
+        +(100 * avgSlippage).toFixed(3) +
+        ` % (avg tx size ${Math.round(avgTxSize).toLocaleString()} DAI)`
     }
   ];
 
@@ -521,6 +520,7 @@ export default function App() {
                       priceTimeseries={priceTimeseries}
                       floorpriceTimeseries={floorpriceTimeseries}
                       totalFundsRaisedTimeseries={totalFundsRaisedTimeseries}
+                      simulationDuration={simulationDuration}
                       p0={p0}
                       p1={p1}
                     />
@@ -566,7 +566,10 @@ export default function App() {
                   </Box>
 
                   <Box className={classes.box}>
-                    <ResultParams resultFields={resultFields} />
+                    <ResultParams
+                      resultFields={resultFields}
+                      simulationDuration={simulationDuration}
+                    />
                   </Box>
                 </Paper>
               </Grid>

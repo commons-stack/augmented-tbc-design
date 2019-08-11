@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   AreaChart,
   Area,
@@ -34,12 +34,14 @@ function PriceSimulationChart({
   priceTimeseries,
   totalFundsRaisedTimeseries,
   floorpriceTimeseries,
+  simulationDuration,
   p0,
   p1
 }: {
   priceTimeseries: number[];
   totalFundsRaisedTimeseries: number[];
   floorpriceTimeseries: number[];
+  simulationDuration: number;
   p0: number;
   p1: number;
 }) {
@@ -58,6 +60,21 @@ function PriceSimulationChart({
       [keyVerticalRight]: totalFundsRaisedTimeseries[t] || 0
     });
   }
+
+  /**
+   * When resizing the window the chart animation looks very bad
+   * Keep the animation active only during the initial animation time,
+   * but afterwards, deactivate to prevent the re-size ugly effect
+   */
+  const [isAnimationActive, setIsAnimationActive] = useState(true);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setIsAnimationActive(false);
+    }, simulationDuration + 100);
+    return () => {
+      clearTimeout(timeout);
+    };
+  });
 
   // Chart components
 
@@ -171,7 +188,8 @@ function PriceSimulationChart({
         <Tooltip content={<CustomTooltip />} />
 
         <Area
-          isAnimationActive={false}
+          isAnimationActive={isAnimationActive}
+          animationDuration={simulationDuration}
           yAxisId="left"
           type="monotone"
           dataKey={keyVerticalLeft}
@@ -181,7 +199,8 @@ function PriceSimulationChart({
           strokeWidth={2}
         />
         <Area
-          isAnimationActive={false}
+          isAnimationActive={isAnimationActive}
+          animationDuration={simulationDuration}
           yAxisId="left"
           type="monotone"
           dataKey={keyVerticalLeft2}
@@ -208,7 +227,8 @@ function PriceSimulationChart({
 
         {/* Capital collected from withdraw fees - AREA */}
         <Area
-          isAnimationActive={false}
+          isAnimationActive={isAnimationActive}
+          animationDuration={simulationDuration}
           yAxisId="right"
           type="monotone"
           dataKey={keyVerticalRight}

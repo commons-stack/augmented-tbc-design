@@ -15,6 +15,7 @@ import { getLinspaceTicks } from "./utils";
 import { getInitialParams, getPriceR } from "./math";
 import { useTheme } from "@material-ui/styles";
 
+const isAnimationActive = false;
 const keyHorizontal = "x";
 const keyVertical = "Supply (tokens) / Reserve (DAI)";
 
@@ -181,7 +182,7 @@ function SupplyVsDemandChart({
         />
         <Tooltip content={<CustomTooltip />} />
         <Area
-          isAnimationActive={false}
+          isAnimationActive={isAnimationActive}
           type="monotone"
           dataKey={keyVertical}
           stroke={theme.palette.primary.main}

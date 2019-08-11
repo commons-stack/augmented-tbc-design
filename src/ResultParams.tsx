@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import TextWithPopover from "./TextWithPopover";
+import DotsLoader from "./DotsLoader";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -42,14 +43,31 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 export default function ResultParams({
-  resultFields
+  resultFields,
+  simulationDuration
 }: {
   resultFields: {
     label: string;
     description: string;
     value: number | string;
   }[];
+  simulationDuration: number;
 }) {
+  /**
+   * When resizing the window the chart animation looks very bad
+   * Keep the animation active only during the initial animation time,
+   * but afterwards, deactivate to prevent the re-size ugly effect
+   */
+  const [isAnimationActive, setIsAnimationActive] = useState(true);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setIsAnimationActive(false);
+    }, simulationDuration);
+    return () => {
+      clearTimeout(timeout);
+    };
+  });
+
   const classes = useStyles();
 
   return (
@@ -61,7 +79,11 @@ export default function ResultParams({
           </Grid>
 
           <Grid item xs={4} className={classes.centerContainer}>
-            <Typography gutterBottom>{value}</Typography>
+            {isAnimationActive ? (
+              <DotsLoader />
+            ) : (
+              <Typography gutterBottom>{value}</Typography>
+            )}
           </Grid>
         </Grid>
       ))}
