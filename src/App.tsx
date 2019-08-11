@@ -279,7 +279,7 @@ export default function App() {
         const S_next = getS({ R, V0, k });
         const floorprice_next = getMinPrice({
           S: S_next,
-          H: S0 - H_next,
+          H: S_next - H_next,
           V0,
           k
         });
