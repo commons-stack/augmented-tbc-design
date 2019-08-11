@@ -63,7 +63,7 @@ export default function ResultParams({
    * Keep the animation active only during the initial animation time,
    * but afterwards, deactivate to prevent the re-size ugly effect
    */
-  const [isAnimationActive, setIsAnimationActive] = useState(false);
+  const [isAnimationActive, setIsAnimationActive] = useState(true);
   useEffect(() => {
     const timeout = setTimeout(() => {
       setIsAnimationActive(false);
