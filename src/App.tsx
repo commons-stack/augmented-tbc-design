@@ -266,56 +266,85 @@ export default function App() {
         const S = getLast(S_t);
         const H = getLast(H_t);
 
-        // enforce the effects of the unvested tokens not being burnable
-        let u_lower;
-        if (H > S) {
-          u_lower = 1;
-        } else {
-          // compute the reserve if all that supply is burned
-          const R_ratio = getR({ S: S - H, V0, k }) / R;
-          u_lower = Math.max(1 - R_ratio, u_min);
+        let R_next: number = 0,
+          S_next: number = 0,
+          H_next: number = 0,
+          price_next: number = 0,
+          txsWithdraw: number[] = [0],
+          floorprice_next: number = 1,
+          slippage: number = 0;
+        // Run the value compution again if the price goes below the floor price
+
+        /**
+         * Since the values u_min and u_max are predefined, it's possible that
+         * the price becomes less than the floor price. This cannot happen.
+         * So the next loop has 10 opportunities to find a price greater than
+         * the floor price. The for loop is used to prevent a possible infinite
+         * loop if a `while` loop was used.
+         */
+        for (let i = 0; i < 20 && price_next < floorprice_next; i++) {
+          // enforce the effects of the unvested tokens not being burnable
+          let u_lower: number, u_upper: number;
+          // if (H > S) {
+          //   u_lower = 1;
+          // } else {
+          //   // compute the reserve if all that supply is burned
+          //   const R_ratio = getR({ S: S - H, V0, k }) / R;
+          //   u_lower = Math.max(1 - R_ratio, u_min);
+          // }
+          // let priceGrowth = rv_U(u_lower, u_max);
+
+          u_lower = u_min_t[t];
+          u_upper = u_max_t[t];
+
+          if (i > 15) u_lower = 1;
+
+          const priceGrowth = rv_U(u_lower, u_upper);
+
+          const deltaR = getDeltaR_priceGrowth({ R, k, priceGrowth });
+          R_next = R + deltaR;
+
+          const txs = getTxDistribution({
+            sum: deltaR,
+            num: txsWeek,
+            spread: tx_spread
+          });
+          // Compute slippage
+          const slippage_txs = txs.map(txR =>
+            getSlippage({ R, deltaR: txR, V0, k })
+          );
+          slippage = getMedian(slippage_txs);
+
+          txsWithdraw = txs.filter(tx => tx < 0);
+
+          // Vest
+          const delta_H = vest_tokens({
+            week: t,
+            H,
+            halflife: vHalflife,
+            cliff
+          });
+          H_next = H - delta_H;
+
+          // find floor price
+          S_next = getS({ R, V0, k });
+          floorprice_next = getMinPrice({
+            S: S_next,
+            H: S_next - H_next,
+            V0,
+            k
+          });
+
+          price_next = getPriceR({ R: R_next, V0, k });
         }
-        let priceGrowth = rv_U(u_lower, u_max);
-        // #### DEMO
-        priceGrowth = rv_U(u_min_t[t], u_max_t[t]);
-
-        const deltaR = getDeltaR_priceGrowth({ R, k, priceGrowth });
-        const R_next = R + deltaR;
-
-        const txs = getTxDistribution({
-          sum: deltaR,
-          num: txsWeek,
-          spread: tx_spread
-        });
-        // Compute slippage
-        const slippage_txs = txs.map(txR =>
-          getSlippage({ R, deltaR: txR, V0, k })
-        );
-        const slippage = getMedian(slippage_txs);
-
-        const txsWithdraw = txs.filter(tx => tx < 0);
-        const wFees = -wFee * getSum(txsWithdraw);
-        //  txsWithdraw.reduce((t, c) => t + c, 0);
-
-        // Vest
-        const delta_H = vest_tokens({ week: t, H, halflife: vHalflife, cliff });
-        const H_next = H - delta_H;
-
-        // find floor price
-        const S_next = getS({ R, V0, k });
-        const floorprice_next = getMinPrice({
-          S: S_next,
-          H: S_next - H_next,
-          V0,
-          k
-        });
 
         const _avgTxSize = getMedian(txsWithdraw);
+        const wFees = -wFee * getSum(txsWithdraw);
 
         R_t.push(R_next);
         S_t.push(S_next);
         H_t.push(H_next);
-        p_t.push(getPriceR({ R: R_next, V0, k }));
+        p_t.push(price_next);
         slippage_t.push(slippage);
         avgTxSize_t.push(_avgTxSize);
         wFee_t.push(getLast(wFee_t) + wFees);
