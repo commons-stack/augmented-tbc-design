@@ -60,6 +60,11 @@ export const resultParameterDescriptions: DescriptionObject = {
     name: "Collateral pool balance",
     text: "Total DAI in the collateral pool at the end of the simulated period"
   },
+  slippage: {
+    name: "Median slippage",
+    text:
+      "Median of change in price a user experiences from the current price to the price received for exiting/selling/burning"
+  },
   initialHatchFunds: {
     name: "Funds generated from Raise Hatch",
     text: "Funds raised during the Hatch that go directly to the cause"
@@ -69,9 +74,8 @@ export const resultParameterDescriptions: DescriptionObject = {
     text:
       "Cumulative sum of exit tributes collected from only exit / sell / burn transactions"
   },
-  slippage: {
-    name: "Median slippage",
-    text:
-      "Median of change in price a user experiences from the current price to the price received for exiting/selling/burning"
+  totalRaised: {
+    name: "Total funds raised for your community",
+    text: "Sum of funds from Raise Hatch + funds from exit tributes"
   }
 };

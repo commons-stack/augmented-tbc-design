@@ -385,6 +385,11 @@ export default function App() {
     x => x + initialHatchFunds
   );
 
+  const totalInitialHatchFunds = Math.round(d0 * theta);
+  const totalExitTributes = Math.round(getLast(withdrawFeeTimeseries));
+  const totalFunds = totalInitialHatchFunds + totalExitTributes;
+  const formatFunds = (n: number) => (+n.toPrecision(3)).toLocaleString();
+
   const resultFields = [
     {
       label: resultParameterDescriptions.totalReserve.name,
@@ -392,23 +397,26 @@ export default function App() {
       value: (+totalReserve.toPrecision(3)).toLocaleString() + " DAI"
     },
     {
-      label: resultParameterDescriptions.initialHatchFunds.name,
-      description: resultParameterDescriptions.initialHatchFunds.text,
-      value: Math.round(d0 * theta).toLocaleString() + " DAI"
-    },
-    {
-      label: resultParameterDescriptions.exitTributes.name,
-      description: resultParameterDescriptions.exitTributes.text,
-      value:
-        (+getLast(withdrawFeeTimeseries).toPrecision(3)).toLocaleString() +
-        " DAI",
-      valueFooter: `From ${withdrawCount} exit txs`
-    },
-    {
       label: resultParameterDescriptions.slippage.name,
       description: resultParameterDescriptions.slippage.text,
       value: +(100 * avgSlippage).toFixed(3) + " %",
       valueFooter: `Avg tx size ${Math.round(avgTxSize).toLocaleString()} DAI`
+    },
+    {
+      label: resultParameterDescriptions.initialHatchFunds.name,
+      description: resultParameterDescriptions.initialHatchFunds.text,
+      value: formatFunds(totalInitialHatchFunds) + " DAI"
+    },
+    {
+      label: resultParameterDescriptions.exitTributes.name,
+      description: resultParameterDescriptions.exitTributes.text,
+      value: formatFunds(totalExitTributes) + " DAI",
+      valueFooter: `From ${withdrawCount} exit txs`
+    },
+    {
+      label: resultParameterDescriptions.totalRaised.name,
+      description: resultParameterDescriptions.totalRaised.text,
+      value: formatFunds(totalFunds) + " DAI"
     }
   ];
 
