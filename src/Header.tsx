@@ -65,9 +65,9 @@ export default function Header() {
       </Typography>
 
       <Typography className={classes.subtitle}>
-        Experiment with the Commons Stack Augmented Bonding Curve component.
-        Customize the hatch variables and explore the continuous funding results
-        for your community.
+        Experiment with the Commons Stack's Augmented Bonding Curve component.
+        Change the Hatch variables to explore what continuous funding streams 
+        can do for your community.
       </Typography>
       <Typography className={classes.subsubtitle}>
         Read more about the Augmented Bonding Curve{" "}
