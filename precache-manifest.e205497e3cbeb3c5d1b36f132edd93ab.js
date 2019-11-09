@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "23b33394c0cee292617a928bff612e8e",
+    "revision": "3571fe45c368722da5e7f321b9c716ea",
     "url": "/augmented-tbc-design/index.html"
   },
   {
-    "revision": "84383d682203fd444916",
+    "revision": "131b8f54a943c24b6048",
     "url": "/augmented-tbc-design/static/css/main.ed579467.chunk.css"
   },
   {
@@ -12,8 +12,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/augmented-tbc-design/static/js/2.dc6af9b8.chunk.js"
   },
   {
-    "revision": "84383d682203fd444916",
-    "url": "/augmented-tbc-design/static/js/main.5d956bc1.chunk.js"
+    "revision": "131b8f54a943c24b6048",
+    "url": "/augmented-tbc-design/static/js/main.8197c9cc.chunk.js"
   },
   {
     "revision": "bbaf5adc59b3ad16792b",
